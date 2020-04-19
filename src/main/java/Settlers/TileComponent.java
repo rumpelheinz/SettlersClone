@@ -240,6 +240,7 @@ public class TileComponent extends Component {
     LinkedList<Resource> resources= new LinkedList<Resource>();
     private void addResource(Resource resource) {
         resources.addFirst(resource);
+        getPathsectionTo(resource.target).signalResource(resource,this);
     }
     public PathSection getPathsectionTo(Component target){
       for  (LengthPair pair:connections){

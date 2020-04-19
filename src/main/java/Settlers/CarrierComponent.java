@@ -13,130 +13,138 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 public class CarrierComponent extends Component {
 
     public PathSection pathSection;
-    float speed = 1f / 60.0f;
+    float speed = 1f / 60.0f;  //Move 1 Tile per second
     protected TaskType currentTaskType = TaskType.IDLE;
-    private Point2D currentTile;
-    private TileComponent a;
-    private TileComponent b;
-    LinkedList <Point2D>locations= new LinkedList<Point2D>();
-    int currentinex;
-    private int targetindex;
+    private Point2D currentPosition2D;
+    private TileComponent aTile;
+    private TileComponent bTile;
+    Point2D[] pathPoints2D;
+    int currentIndex;
+    private int targetIndex;
 
-    public CarrierComponent() {
+    void move(double tpf) {  //called once per onUpdate
+        if (targetIndex == currentIndex) {
+            return;
+        }
+        if (targetIndex > -1) {
+            int curTargetIndex = targetIndex > currentIndex ? currentIndex + 1 : currentIndex - 1;
+            Point2D currTargetLoc = pathPoints2D[(curTargetIndex)];
 
+            Point2D aLoc = pathPoints2D[(currentIndex)];
+            Point2D bLoc = currTargetLoc;
+            Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
+            dir = dir.mul(speed);                        //
+            if (dir.length() >= new Vec2(currentPosition2D.subtract(bLoc)).length()) {   // update next location when the next point is reached
+                currentPosition2D = currTargetLoc;
+                entity.setPosition(currTargetLoc);
+//                texture.setTranslateX(currentPosition2D.getX());
+//                texture.setTranslateY(currentPosition2D.getY());
+                currentIndex = curTargetIndex;
+            } else {
+                currentPosition2D = dir.add(currentPosition2D).toPoint2D();
+//                texture.setTranslateX(currentPosition2D.getX());
+//                texture.setTranslateY(currentPosition2D.getY());
+                entity.setPosition(currentPosition2D); //Uncommenting this line increases CPUusage significantly
+            }
+        }
     }
+
+
+    Texture texture;
 
     @Override
     public void onAdded() {
-        Texture texture= texture("pirates/006-monkey.png",32,32);
-        texture.setTranslateX(-32/2);
-        texture.setTranslateY(-32/2);
+        texture = texture("pirates/006-monkey.png", 32, 32);
+        texture.setTranslateX(-32 / 2);
+        texture.setTranslateY(-32 / 2);
         texture.setScaleX(2);
         texture.setScaleY(2);
         entity.setZ(10);
         entity.getViewComponent().addChild(texture);
     }
 
+    //more code
 
-
-    void move(double tpf) {
-        if (targetindex==currentinex){
-            return;
-        }
-        if (targetindex > -1 ) {
-            int curTargetIndex = targetindex>currentinex? currentinex+1: currentinex-1;
-            Point2D currTargetLoc = locations.get(curTargetIndex);
-       //     System.out.println("from " +currentinex+ " " +currentTile+"  -> "+ targetindex +" "+ locations.getLast()+" via  "+curTargetIndex+" " +currTargetLoc );
-
-            Point2D aLoc = locations.get(currentinex);
-            Point2D bLoc = currTargetLoc;
-            Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
-            // System.out.println(dir.toString());
-            dir = dir.mul(speed);
-            if (dir.length() >= new Vec2(currentTile.subtract(bLoc)).length()) {
-                currentTile=currTargetLoc;
-                entity.setPosition(currTargetLoc);
-                currentinex=curTargetIndex;
-            } else {
-                //  System.out.println(dir.toString());
-
-                currentTile=dir.add(currentTile).toPoint2D();
-            //    entity.setPosition(currentTile);
-
-            }
-        }
-    }
 
     @Override
     public void onUpdate(double tpf) {
-        //   System.out.println(" " + currentTask + "X " + entity.getX() + " Y " + entity.getY());
-
         switch (currentTaskType) {
+
+            case MOVINGUPANDDOWN:
+                if (targetIndex == currentIndex) {
+                    if (currentPosition2D.equals(pathPoints2D[pathPoints2D.length - 1])) {
+                        targetIndex = 0;
+                    } else {
+                        targetIndex = pathPoints2D.length - 1;
+                    }
+                    currentTaskType = TaskType.MOVINGUPANDDOWN;
+                }
+                move(tpf);
 
 
             case GATHERING:
                 move(tpf);
-                if (targetindex==currentinex) {
+                if (targetIndex == currentIndex) {
                     currentTaskType = TaskType.IDLE;
                 }
 
                 break;
             case IDLE:
-                if (currentTile.equals(locations.getLast())){
-                    targetindex = 0;
-                }
-                else {
-                    targetindex=locations.size()-1;
-                }
-            //    path = locations;
-                currentTaskType=TaskType.GATHERING;
 
-
-//                if (findPath(findTreeQuery)) {
-//                    currentTaskType = TaskType.GATHERING;
-//                }
+                currentTaskType = TaskType.MOVINGUPANDDOWN;
                 break;
             case RETURNING:
-//                move(tpf);
-//                if (currentTile == home) {
-//                    hasTree = false;
-//                    currentTaskType = TaskType.IDLE;
-//                }
+                move(tpf);
+                if (targetIndex == currentIndex) {
+                    currentTaskType = TaskType.IDLE;
+                }
                 break;
+
         }
-
-//        if (path != null && path.size() > 0) {
-//            TileComponent curtarget = path.getFirst();
-//            Point2D a = currentTile.getEntity().getPosition();
-//            Point2D b = curtarget.getEntity().getPosition();
-//            Vec2 dir = new Vec2(b.getX() - a.getX(), b.getY() - a.getY());
-//            System.out.println(dir.toString());
-//            dir = dir.mul(speed);
-//            if (dir.length() > new Vec2(entity.getPosition().subtract(b)).length()) {
-//                entity.setPosition(curtarget.getEntity().getPosition());
-//                currentTile = curtarget;
-//                path.remove(0);
-//            } else {
-//                System.out.println(dir.toString());
-//                entity.setPosition(dir.add(entity.getPosition()));
-//            }
-//
-//        }
-
-        //    System.out.println(tpf);
-        super.onUpdate(tpf);
+//        super.onUpdate(tpf);
     }
-    Point2D middle;
-    public void setPathSection(PathSection pathSection) {
-        this.pathSection=pathSection;
-        for (TileComponent tile:pathSection.currentTileList){
-            locations.add(new Point2D(tile.getEntity().getX(),tile.getEntity().getY()));
-        }
-        a=pathSection.a;
-        b=pathSection.b;
-        middle=locations.get(locations.size() / 2);
-        currentinex= locations.size()/2;
-        currentTile = middle;
 
+    Point2D middle;
+
+    public void setPathSection(PathSection pathSection) {
+        this.pathSection = pathSection;
+        LinkedList<Point2D> tempLocations = new LinkedList<Point2D>();
+        pathPoints2D = new Point2D[pathSection.currentTileList.size()];
+        int i = 0;
+        for (TileComponent tile : pathSection.currentTileList) {
+            pathPoints2D[i] = tile.getEntity().getPosition();
+            i++;
+        }
+        aTile = pathSection.a;
+        bTile = pathSection.b;
+        middle = pathPoints2D[pathPoints2D.length / 2];
+        currentIndex = pathPoints2D.length / 2;
+        currentPosition2D = middle;
+
+    }
+
+    //TODO: Implement resource gathering functionality
+    boolean hasResource = false;
+    Resource resource = null;
+    TileComponent dropOffTile = null;
+
+    private void setTargetResource(Resource newResource, TileComponent fromTile) {
+        if (fromTile == aTile) {
+            targetIndex = 0;
+            resource = newResource;
+            dropOffTile = aTile;
+        } else {
+            targetIndex = pathPoints2D.length - 1;
+            resource = newResource;
+            dropOffTile = bTile;
+        }
+    }
+
+    public boolean signalResource(Resource newResource, TileComponent fromTile) {
+        if (resource == null) {
+            setTargetResource(newResource, fromTile);
+            return true;
+        }
+        return false;
     }
 }

@@ -36,8 +36,8 @@ public class BasicGameApp extends GameApplication {
 
         FXGL.getPrimaryStage().setX(-1920);
         FXGL.getPrimaryStage().setY(0);
-        map=  loadLevel("assets/json/map3.json");
-//        map=  loadLevel("assets/json/mapnone.json");
+//        map=  loadLevel("assets/json/map3.json");
+        map=  loadLevel("assets/json/mapnone.json");
 //        getGameScene().getRoot().setScaleX(0.5);
 //        getGameScene().getRoot().setScaleY(0.5);
         Viewport viewport = FXGL.getGameScene().getViewport();

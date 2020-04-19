@@ -1,5 +1,5 @@
 package Settlers.Types;
 
 public enum TaskType {
-    GATHERING,IDLE, RETURNING
+    GATHERING,IDLE, RETURNING, MOVINGUPANDDOWN
 }

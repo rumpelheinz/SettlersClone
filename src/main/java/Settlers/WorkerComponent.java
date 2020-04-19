@@ -73,7 +73,7 @@ public class WorkerComponent extends Component {
             Vec2 dir = new Vec2(b.getX() - a.getX(), b.getY() - a.getY());
             // System.out.println(dir.toString());
             dir = dir.mul(speed);
-            if (dir.length() >= new Vec2(entity.getPosition().subtract(b)).length()) {
+            if (dir.length() >= new Vec2(currentPosition.subtract(b)).length()) {
                 currentPosition = curtarget.getEntity().getPosition();
                 entity.setPosition(currentPosition);
                 currentTile = curtarget;
@@ -85,7 +85,6 @@ public class WorkerComponent extends Component {
             }
         }
     }
-
 
     private SearchQuery findHomeQuery = new SearchQuery() {
         @Override

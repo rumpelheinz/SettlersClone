@@ -136,4 +136,7 @@ public class PathSection {
     }
 
 
+    public void signalResource(Resource resource,TileComponent fromTile){
+        carrier.signalResource(resource,fromTile);
+    }
 }
