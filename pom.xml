@@ -19,12 +19,22 @@
     </properties>
     <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
 
-
+    <repositories>
+        <repository>
+            <id>oss.sonatype.org-snapshot</id>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>com.github.almasb</groupId>-->
+<!--            <artifactId>fxgl</artifactId>-->
+<!--            <version>11.8</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.github.almasb</groupId>
             <artifactId>fxgl</artifactId>
-            <version>11.8</version>
+            <version>dev-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>

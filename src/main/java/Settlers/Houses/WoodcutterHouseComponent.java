@@ -1,7 +1,6 @@
 package Settlers.Houses;
 
 import Settlers.*;
-import Settlers.Types.TileType;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.texture.Texture;
 
@@ -16,49 +15,32 @@ public class WoodcutterHouseComponent extends HouseComponent {
     @Override
     public void onAdded() {
         //     entity.setScaleX(-1);
-        texture = FXGL.texture("house.png");
+        texture = FXGL.texture("objects/tavern.png", 64, 64);
         texture.setTranslateX(-40);
-        texture.setTranslateY(-40);
+        texture.setTranslateY(-80);
 
         entity.getViewComponent().addChild(texture);
-        WorkerComponent worker2 = spawn("worker", entity.getX(), entity.getY()).getComponent(WorkerComponent.class);
+        WoodCutterComponent worker2 = spawn("worker", entity.getX(), entity.getY()).getComponent(WoodCutterComponent.class);
         worker2.setCurrentTile(entity.getComponent(TileComponent.class));
-        worker2.home = (entity.getComponent(TileComponent.class));
-        flagComponent = entity.getComponent(TileComponent.class);
+        worker2.homeTile = (entity.getComponent(TileComponent.class));
+        worker2.house = this;
         flagComponent.setHouse(this);
         //   entity.getViewComponent().clearChildren();
         // entity.getViewComponent().addChild(texture);
-        findStoreHouseQuery= new SearchQuery() {
-            @Override
-            public boolean isValidTarget(TileComponent compareTile) {
-           //     return compareTile == flagComponent && compareTile.type!=TileType.WATER;
-                if (compareTile.getEntity().hasComponent(StoreHouseComponent.class)) {
-                    return true;
-                }
-                TileComponent.clearAllSearches();
-                compareTile.calculatePath();
-                LinkedList<TileComponent.LengthPair> connectionList = compareTile.getEntity().getComponent(TileComponent.class).connections;
-                if (connectionList == null) {
-                } else {
-                    for (TileComponent.LengthPair connection : connectionList) {
-                        if (connection.component instanceof StoreHouseComponent) {
-                            return true;
-                        }
+        findStoreHouseQuery = PathSection.findPathQuerry(compareTile -> {
+            if ((compareTile.house instanceof StoreHouseComponent)) {
+                return true;
+            }
+            LinkedList<TileComponent.LengthPair> connectionList = compareTile.getEntity().getComponent(TileComponent.class).connections;
+            if (connectionList != null) {
+                for (TileComponent.LengthPair connection : connectionList) {
+                    if (connection.component instanceof StoreHouseComponent) {
+                        return true;
                     }
                 }
-                return false;
             }
-
-            @Override
-            public boolean canGoThrough(TileComponent compareTile) {
-                return ((compareTile.pathPassingThrough == null) && !compareTile.flag && compareTile.type!= TileType.WATER);
-            }
-
-            @Override
-            public boolean canStartAt(TileComponent startTile) {
-                return startTile.type!=TileType.WATER;
-            }
-        };
+            return false;
+        });
 
 
     }
@@ -79,16 +61,29 @@ public class WoodcutterHouseComponent extends HouseComponent {
 
     private void buildStoreHousePath() {
 
-        SearchResult result = Map.findPath(findStoreHouseQuery, entity.getComponent(TileComponent.class));
+        SearchResult result = Map.findPath(findStoreHouseQuery, entity.getComponent(TileComponent.class),true);
         if (result.success) {
             result.path.addFirst(entity.getComponent(TileComponent.class));
             storeHousePath = new PathSection(result.path);
         }
+        flagComponent.reCalculatePath();
+
     }
 
 
     @Override
     public int wantResource(Resource resource) {
         return 0;
+    }
+
+    @Override
+    public void addResource(Resource resource) {
+        inventoryList.add(resource);
+        flagComponent.signalResource(resource, 0);
+    }
+
+    @Override
+    public boolean pickUp(Resource resource) {
+        return inventoryList.remove(resource);
     }
 }

@@ -13,9 +13,9 @@ public class StoreHouseComponent extends HouseComponent {
     @Override
     public void onAdded() {
    //     entity.setScaleX(-1);
-        texture = FXGL.texture("objects/oldBuilding.png");
+        texture = FXGL.texture("objects/oldBuilding.png",100,100);
         texture.setTranslateX(-40);
-        texture.setTranslateY(-40);
+        texture.setTranslateY(-80);
         TileComponent flag= getEntity().getComponent(TileComponent.class);
         flag.setHouse(this);
         entity.getViewComponent().addChild(texture);
@@ -36,5 +36,19 @@ public class StoreHouseComponent extends HouseComponent {
             case STONE: return 1;
         }
         return 0;
-    };
+    }
+
+    @Override
+    public void addResource(Resource resource) {
+        inventoryList.add(resource);
+        resource.target=null;
+//        flagComponent.signalResource(resource);
+    }
+
+    @Override
+    public boolean pickUp(Resource resource) {
+        return inventoryList.remove(resource);
+    }
+
+    ;
 }

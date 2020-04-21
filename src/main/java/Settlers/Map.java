@@ -12,6 +12,7 @@ public class Map {
     int width;
     int height;
     Random random = new Random();
+    static TileContainerComponent tileContainer;
 
     HashMap<Vec2, TileComponent> tiles;
 
@@ -83,7 +84,7 @@ public class Map {
     }
 
 
-    public static SearchResult findPath(SearchQuery parameter, TileComponent currentTile) {
+    public static SearchResult findPath(SearchQuery parameter, TileComponent currentTile, boolean avoidExistingPaths) {
         if (!parameter.canStartAt(currentTile)) {
             return new SearchResult(false, currentTile, null, null);
         }
@@ -92,7 +93,7 @@ public class Map {
         LinkedList<TileComponent> toLookat = new LinkedList<TileComponent>();
         toLookat.add(currentTile);
         currentTile.pathHere = new LinkedList<TileComponent>();
-
+        currentTile.lookedAt = true;
         TileComponent target;
         if (parameter.isValidTarget(currentTile)) {
             path = currentTile.pathHere;
@@ -100,12 +101,6 @@ public class Map {
             target = currentTile;
             return new SearchResult(true, currentTile, target, path);
         }
-//      //  path.addLast(BasicGameApp.map.tiles.get(new Vec2(2,2)));
-//        path.addLast(BasicGameApp.map.tiles.get(new Vec2(3,2)));
-//        path.addLast(BasicGameApp.map.tiles.get(new Vec2(3,3)));
-//        path.addLast(BasicGameApp.map.tiles.get(new Vec2(3,4)));
-//        path.addLast(BasicGameApp.map.tiles.get(new Vec2(4,4)));
-//        path.addLast(BasicGameApp.map.tiles.get(new Vec2(5,4)));
         while (toLookat.size() > 0) {
             TileComponent cTile = toLookat.getFirst();
             toLookat.remove(0);
@@ -113,20 +108,37 @@ public class Map {
                 if (cTile.hasPath(dir)) {
                     TileComponent nextTile = cTile.getNeighbour(dir);
                     LinkedList<TileComponent> newList = (LinkedList<TileComponent>) cTile.pathHere.clone();
+                    boolean alreadypresent = newList.contains(nextTile);
                     newList.addLast(nextTile);
-                    if (parameter.isValidTarget(nextTile) && (parameter.canGoThrough(cTile) || cTile == currentTile)) {
-                        nextTile.pathHere = newList;
-                        path = nextTile.pathHere;
-                        target = nextTile;
-                        return new SearchResult(true, currentTile, target, path);
-
-                    } else {
-                        if (!nextTile.lookedAt && (parameter.canGoThrough(cTile) || cTile == currentTile)) {
-                            nextTile.pathHere = newList;
-                            nextTile.lookedAt = true;
-                            toLookat.addLast(nextTile);
-
+                    boolean validtarget = parameter.isValidTarget(nextTile) && currentTile != nextTile && (parameter.canGoThrough(cTile) || cTile == currentTile);
+                    if (validtarget) {
+                        if (avoidExistingPaths) {
+                            newList.addFirst(currentTile);
+                            LinkedList<TileComponent.LengthPair> allPathSectionsTo = currentTile.getAllPathsectionsTo(nextTile);
+                            for (TileComponent.LengthPair pair : allPathSectionsTo) {
+                                if (pair.pathSection != null) {
+                                    if (pair.pathSection.identicalPath(newList)) {
+                                        validtarget = false;
+                                    }
+                                }
+                            }
+                            newList.remove(currentTile);
                         }
+//
+                        if (validtarget) {
+                            nextTile.pathHere = newList;
+                            path = nextTile.pathHere;
+                            target = nextTile;
+                            return new SearchResult(true, currentTile, target, path);
+                        }
+
+                    }
+                    if (!nextTile.lookedAt && (parameter.canGoThrough(cTile) || cTile == currentTile)) {
+                        nextTile.pathHere = newList;
+                        nextTile.lookedAt = true;
+                        toLookat.addLast(nextTile);
+
+
                     }
                 }
 

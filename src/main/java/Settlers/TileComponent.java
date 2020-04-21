@@ -7,14 +7,19 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.texture.Texture;
+
+import javafx.scene.Group;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import org.jetbrains.annotations.NotNull;
+
 
 import java.util.LinkedList;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
-public class TileComponent extends Component {
+public class TileComponent extends InventoryComponent {
     public final TileType type;
     protected int x;
     protected int y;
@@ -26,6 +31,9 @@ public class TileComponent extends Component {
     TileComponent SE;
     public PathSection pathPassingThrough = null;
     public boolean flag = false;
+    final public static int TILEHEIGHT = 32 * 3;
+    final public static int TILEWIDTH = 28 * 3;
+    static private BlendMode defaultblendmode;
 
     public Direction directionOfNeighbour(TileComponent neighbour) {
         for (Direction dir : Direction.values()) {
@@ -38,21 +46,22 @@ public class TileComponent extends Component {
 
     protected LinkedList<TileComponent> pathHere;
     boolean lookedAt = false;
+
     public TileComponent(int x, int y, TileType type) {
         this.x = x;
         this.y = y;
         this.type = type;
 
-        texture = texture("objects/sign.png");
-        texture.setTranslateY(-30);
-        texture.setTranslateX(-10);
+        flagTexture = texture("objects/sign.png", TILEWIDTH / 3, TILEHEIGHT / 3);
+        flagTexture.setTranslateY(-TILEWIDTH / 3);
+        flagTexture.setTranslateX(-TILEHEIGHT / 3 / 2);
         pathSections = new LinkedList<PathSection>();
         allFlags.add(this);
 
-        int coordx = x * 110;
-        int coordy = y * 95;
+        int coordx = (x * (TILEWIDTH));
+        int coordy = (int) (Math.round(y * TILEWIDTH * (0.83)));
         if (y % 2 == 1) {
-            coordx += 55;
+            coordx += (TILEWIDTH) / 2;
         }
         SpawnData data = new SpawnData(coordx, coordy);
         data.put("type", type);
@@ -68,29 +77,69 @@ public class TileComponent extends Component {
 //            entity.addComponent(new TreeComponent(trees));
     }
 
+    Group stock;
+
     @Override
     public void onAdded() {
+        stock = new Group();
+        stock.setTranslateX(TILEWIDTH / 2 * 1);
+        stock.setTranslateY(TILEHEIGHT / 2 * 0.1);
+        entity.getViewComponent().addChild(stock);
         entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
             System.out.println("x" + x + "y" + y);
-            clickpath(this);
+            clickpath(this, e.getButton());
             setActive();
         });
+        drawStock();
+        defaultblendmode=getEntity().getViewComponent().getChildren().get(0).getBlendMode();
+//        entity.setUpdateEnabled(false);
     }
 
     static TileComponent firstClicked;
     static TileComponent secondClicked;
 
-    static void clickpath(TileComponent tileComponent) {
-        if (firstClicked == null) {
-            firstClicked = tileComponent;
-            firstClicked.getEntity().getViewComponent().setOpacity(0.5);
-        } else {
-            secondClicked = tileComponent;
-            PathSection.buildPath(firstClicked,secondClicked);
+    private enum ClickMode {
+        BUILDPATH, DESTROY
+    }
 
+    ;
+    private static ClickMode clickMode;
+    static void clickpath(TileComponent tileComponent, MouseButton button) {
+
+        if (firstClicked == null) {
+            if (button.equals(MouseButton.PRIMARY)) {
+                firstClicked = tileComponent;
+                firstClicked.getEntity().getViewComponent().setOpacity(0.5);
+                clickMode = ClickMode.BUILDPATH;
+
+            }
+            else if (button.equals(MouseButton.SECONDARY)) {
+                firstClicked = tileComponent;
+                firstClicked.getEntity().getViewComponent().getChildren().get(0).blendModeProperty().set(BlendMode.RED);
+                clickMode = ClickMode.DESTROY;
+            }
+
+        } else {
+            if (button.equals(MouseButton.PRIMARY)) {
+                secondClicked = tileComponent;
+                if (clickMode == ClickMode.BUILDPATH)
+                    PathSection.buildPath(firstClicked, secondClicked);
+
+            } else {
+                secondClicked = tileComponent;
+                if (clickMode == ClickMode.DESTROY) {
+                    if (firstClicked == secondClicked) {
+                        if (firstClicked.pathPassingThrough != null) {
+                            firstClicked.pathPassingThrough.destroyPath(true, null);
+                        }
+                    }
+                }
+            }
             firstClicked.getEntity().getViewComponent().setOpacity(1);
+            firstClicked.getEntity().getViewComponent().getChildren().get(0).blendModeProperty().set(defaultblendmode);
             firstClicked = null;
             secondClicked = null;
+
         }
     }
 
@@ -127,10 +176,10 @@ public class TileComponent extends Component {
         lookedAt = false;
     }
 
-    Texture texture;
+    Texture flagTexture;
     boolean active = false;
     LinkedList<PathSection> pathSections;
-    HouseComponent house;
+    public HouseComponent house;
     PathSection predecessorPath;
     LinkedList<TileComponent.LengthPair> calculatedConnections;
     public LinkedList<TileComponent.LengthPair> connections;
@@ -146,11 +195,11 @@ public class TileComponent extends Component {
 
     public static void clearAllSearches() {
         searches++;
-      //  System.out.print("Search " + searches);
+        //  System.out.print("Search " + searches);
         for (TileComponent flag : allFlags) {
             flag.clearPathSearch();
         }
-    //    System.out.println("Enndsearch " + searches);
+        //    System.out.println("Enndsearch " + searches);
 
 //        for (FlagComponent flag : allFlags) {
 //            System.out.print("x");
@@ -172,12 +221,12 @@ public class TileComponent extends Component {
         if (flag) {
             if (!active) {
                 active = true;
-                entity.getViewComponent().addChild(texture);
+                entity.getViewComponent().addChild(flagTexture);
             }
         } else {
             if (active) {
                 active = false;
-                entity.getViewComponent().removeChild(texture);
+                entity.getViewComponent().removeChild(flagTexture);
 
             }
         }
@@ -186,8 +235,7 @@ public class TileComponent extends Component {
     public void setFlag(boolean flag) {
         setActive();
         if (flag) {
-            if (this.flag) {
-
+            if (this.flag ) {
             } else {
                 this.flag = true;
                 setActive();
@@ -197,9 +245,22 @@ public class TileComponent extends Component {
                     oldpassiongThrough.split(this);
                 }
             }
-        }
-        else{
-            this.flag=false;
+        } else {
+            if (this.flag && connections!=null) {
+                LinkedList<TileComponent> connected=new LinkedList<>();
+                LinkedList<LengthPair> oldconnections=new LinkedList<>();
+                for (PathSection pathSection: pathSections){
+                    connected.add(pathSection.getOtherSide(this));
+                    if (pathSection.getOtherSide(this).connections!=null){
+                        oldconnections.addAll(pathSection.getOtherSide(this).connections);
+                    }
+                    pathSection.destroyPath(false,this);
+                }
+                for (TileComponent comp:connected) {
+                    
+                }
+            }
+            this.flag = false;
         }
         setActive();
 
@@ -218,38 +279,110 @@ public class TileComponent extends Component {
         }
     }
 
-    public void signalResource(Resource resource) {
-        int maxPriority=0;
-        int maxDistance=Integer.MAX_VALUE;
-        HouseComponent target=null;
-        for (LengthPair location:connections){
-            if (location.type== LengthPairType.BUILDING){
-                HouseComponent curTarget= (HouseComponent) location.component;
-                if (target==null||curTarget.wantResource(resource)>maxPriority||(location.distance<maxDistance&&curTarget.wantResource(resource)>=maxPriority)){
-                    target=curTarget;
-                    maxPriority=curTarget.wantResource(resource);
-                    maxDistance=maxDistance;
+    public void signalResource(Resource resource, int maxPriority) {
+
+        int maxDistance = Integer.MAX_VALUE;
+        HouseComponent target = null;
+        if (connections != null) {
+            for (LengthPair location : connections) {
+                if (location.type == LengthPairType.BUILDING) {
+                    HouseComponent curTarget = (HouseComponent) location.component;
+                    if (curTarget.wantResource(resource) > maxPriority || (location.distance < maxDistance && curTarget.wantResource(resource) >= maxPriority)) {
+                        target = curTarget;
+                        maxPriority = curTarget.wantResource(resource);
+                        maxDistance = location.distance;
+                    }
+                }
+            }
+
+        }
+        if (target != null) {
+            resource.setTarget(target);
+        }
+
+//        addResource(resource);
+    }
+
+    void drawStock() {
+        stock.getChildren().clear();
+        int i = 0;
+        for (Resource resource : inventoryList) {
+            Texture tex = getResourceTexture(resource);
+            tex.setTranslateY(-i * 15);
+            stock.getChildren().add(tex);
+            i++;
+        }
+    }
+
+    private Texture getResourceTexture(Resource resource) {
+        Texture tex = null;
+        switch (resource.type) {
+            case LOG:
+                tex = texture("log.png", 32, 32);
+                break;
+            case PLANK:
+                tex = texture("plank.png", 32, 32);
+                break;
+            case STONE:
+                tex = texture("stone.png", 32, 32);
+                break;
+        }
+        tex.setTranslateY(-32);
+        tex.setTranslateX(-32);
+        return tex;
+    }
+
+    public void addResource(Resource resource) {
+        resource.reservedByWorker = null;
+        if (resource.target == null) {
+            signalResource(resource, 0);
+        }
+        if (resource.target != null) {
+            if (this.house != null && resource.target == house) {
+                house.addResource(resource);
+            } else {
+                getPathsectionTo(resource.target).pathSection.signalResource(resource, this);
+                inventoryList.add(resource);
+            }
+        } else {
+            inventoryList.add(resource);
+        }
+        drawStock();
+
+    }
+
+    public LinkedList<LengthPair> getAllPathsectionsTo(Component target) {
+        LinkedList<LengthPair> allPathSectionsToTarget = new LinkedList<>();
+        if (connections != null) {
+            for (LengthPair pair : connections) {
+                if (pair.component == target) {
+                    allPathSectionsToTarget.add(pair);
                 }
             }
         }
-        if (target!=null){
-            addResource(resource);
-            resource.target=target;
+        return allPathSectionsToTarget;
+    }
+
+    public LengthPair getPathsectionTo(Component target) {
+        for (LengthPair pair : connections) {
+            if (pair.component == target) {
+                return pair;
+            }
         }
+        return null;
     }
-    LinkedList<Resource> resources= new LinkedList<Resource>();
-    private void addResource(Resource resource) {
-        resources.addFirst(resource);
-        getPathsectionTo(resource.target).signalResource(resource,this);
+
+    ;
+
+    public boolean pickUp(Resource resource) {
+        boolean ret = inventoryList.remove(resource);
+        if (!ret) {
+            ret = house.pickUp(resource);
+        } else {
+            drawStock();
+        }
+        return ret;
     }
-    public PathSection getPathsectionTo(Component target){
-      for  (LengthPair pair:connections){
-          if (pair.component==target){
-              return pair.pathSection;
-          }
-      }
-      return null;
-    };
 
     private enum LengthPairType {
         BUILDING, FLAG
@@ -274,8 +407,20 @@ public class TileComponent extends Component {
         setFlag(true);
     }
 
+    public void reCalculatePath() {
+        clearAllSearches();
+        calculatePath();
+        if (connections != null)
+            for (TileComponent.LengthPair comp : connections) {
+                if (comp.component instanceof TileComponent) {
+                    clearAllSearches();
+                    ((TileComponent) comp.component).calculatePath();
+                }
+            }
+    }
+
     public void calculatePath() {
-        if (pathSections.size()==0){
+        if (pathSections.size() == 0) {
             return;
         }
         System.out.println();
@@ -319,16 +464,34 @@ public class TileComponent extends Component {
 
             } else {
                 connections = calculatedConnections;
+                if (house != null) {
+                    connections.add(new LengthPair(0, house, null, LengthPairType.BUILDING));
+                }
                 System.out.println("null");
             }
+        }
+        reCalculateStock();
+        if (house != null) {
+            house.reCalculateStock();
         }
 
         System.out.println("\nFinished with " + entity.getComponent(TileComponent.class).x + " " + entity.getComponent(TileComponent.class).y + "_" + finishedlistsize + "_ " + (connections == null ? "null" : connections.size()));
 
     }
 
+    private void reCalculateStock() {
+        for (Resource resource : inventoryList) {
+            if (resource.target != null) {
+                if (getPathsectionTo(resource.target) == null && resource.target != house) {
+                    resource.setTarget(null);
+                }
+            }
+        }
+    }
 
-    private void setCalculatedConnections(LinkedList<TileComponent.LengthPair> predecessorCalculatedConnections, PathSection predecessorPath) {
+
+    private void setCalculatedConnections
+            (LinkedList<TileComponent.LengthPair> predecessorCalculatedConnections, PathSection predecessorPath) {
         for (LengthPair lengthPair : predecessorCalculatedConnections) {
             calculatedConnections.add(new LengthPair(lengthPair.distance + 1, lengthPair.component, predecessorPath, lengthPair.type));
         }
@@ -340,6 +503,10 @@ public class TileComponent extends Component {
         }
         calculatedConnections.add(new LengthPair(0, this, null, LengthPairType.FLAG));
         return calculatedConnections;
+    }
+
+    void destroyFlag() {
+        setFlag(false);
     }
 
 }

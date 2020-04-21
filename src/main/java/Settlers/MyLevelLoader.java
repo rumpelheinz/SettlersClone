@@ -2,16 +2,17 @@ package Settlers;
 
 import java.io.*;
 
+import Settlers.Houses.SawmillHouseComponent;
 import Settlers.Houses.StoreHouseComponent;
 import Settlers.Houses.WoodcutterHouseComponent;
 import Settlers.Types.TileType;
+import com.almasb.fxgl.entity.SpawnData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
-
 
 public class MyLevelLoader {
     public Map load(File file) {
@@ -51,31 +52,36 @@ public class MyLevelLoader {
             JSONArray data = (JSONArray) tilelayer.get("data");
             int x=0;
             int y=0;
+
             Map map=new Map(width,height);
             while(data.size()>0){
                 Long typeInt= (Long) data.get(0);
                 data.remove(0);
 
                 TileType tileType;
-                if (typeInt == 4098) {
+                if (typeInt == 2) {
                     tileType = TileType.WATER;
                     map.addTile(x,y,tileType);
-                } else if (typeInt == 4130) {
+                } else if (typeInt == 34) {
                     tileType = TileType.GRASS;
                     map.addTile(x,y,tileType);
-                } else if (typeInt == 4114) {//Forrest
+                } else if (typeInt == 18) {//Forrest
                     tileType = TileType.GRASS;
                     TileComponent tile=map.addTile(x,y,tileType);
-                    tile.getEntity().addComponent(new TreeComponent(3));
+                    tile.getEntity().addComponent(new TreeComponent(1));
                 }
-                else if (typeInt == 4100) {//Hut
+                else if (typeInt == 4) {//Hut
                     tileType = TileType.GRASS;
                     TileComponent tile=map.addTile(x,y,tileType);
                     tile.getEntity().addComponent(new WoodcutterHouseComponent());
-                }else if (typeInt == 4104) {//StoreHouse
+                }else if (typeInt == 8) {//StoreHouse
                     tileType = TileType.GRASS;
                     TileComponent tile=map.addTile(x,y,tileType);
                     tile.getEntity().addComponent(new StoreHouseComponent());
+                }else if (typeInt == 9) {//StoreHouse
+                    tileType = TileType.GRASS;
+                    TileComponent tile=map.addTile(x,y,tileType);
+                    tile.getEntity().addComponent(new SawmillHouseComponent());
                 }
                 else {
                     tileType = TileType.WATER;
@@ -88,6 +94,8 @@ public class MyLevelLoader {
                     y++;
                 }
             }
+//            SpawnData spawnData=new SpawnData(0,0);
+//            spawn("tileContainer",spawnData);
 
             return map;
 //            obj.layers[0].data
