@@ -185,7 +185,9 @@ public class WoodCutterComponent extends Component {
                 case RETURNING:
                     move(tpf);
                     if (currentTile == homeTile) {
-
+                        if (house.destroyed) {
+                            entity.removeFromWorld();
+                        }
                         currentTaskType = TaskType.GOINGINSIDE;
                         startWaiting(1000);
 
@@ -193,16 +195,20 @@ public class WoodCutterComponent extends Component {
                     break;
 
                 case GOINGINSIDE:
-                    if (hasTree) {
-                        house.addResource(new Resource(ResourceType.LOG));
-                        entity.getViewComponent().removeChild(log);
+                    if (house.destroyed) {
+                        entity.removeFromWorld();
+                    } else {
+                        if (hasTree) {
+                            house.addResource(new Resource(ResourceType.LOG));
+                            entity.getViewComponent().removeChild(log);
+                        }
+                        hasTree = false;
+                        texture.setVisible(false);
+                        currentTaskType = TaskType.IDLE;
+                        inside = true;
+                        texture.setVisible(false);
+                        startWaiting(5000);
                     }
-                    hasTree = false;
-                    texture.setVisible(false);
-                    currentTaskType = TaskType.IDLE;
-                    inside = true;
-                    texture.setVisible(false);
-                    startWaiting(5000);
 
                     break;
             }
@@ -230,7 +236,7 @@ public class WoodCutterComponent extends Component {
         } else {
             return false;
         }
-
+//return false;
     }
 
 }

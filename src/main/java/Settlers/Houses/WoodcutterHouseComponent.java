@@ -9,8 +9,6 @@ import java.util.LinkedList;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 public class WoodcutterHouseComponent extends HouseComponent {
-    private Texture texture;
-
 
     @Override
     public void onAdded() {
@@ -19,14 +17,13 @@ public class WoodcutterHouseComponent extends HouseComponent {
         texture.setTranslateX(-40);
         texture.setTranslateY(-80);
 
-        entity.getViewComponent().addChild(texture);
         WoodCutterComponent worker2 = spawn("worker", entity.getX(), entity.getY()).getComponent(WoodCutterComponent.class);
         worker2.setCurrentTile(entity.getComponent(TileComponent.class));
         worker2.homeTile = (entity.getComponent(TileComponent.class));
         worker2.house = this;
         flagComponent.setHouse(this);
         //   entity.getViewComponent().clearChildren();
-        // entity.getViewComponent().addChild(texture);
+         entity.getViewComponent().addChild(texture);
         findStoreHouseQuery = PathSection.findPathQuerry(compareTile -> {
             if ((compareTile.house instanceof StoreHouseComponent)) {
                 return true;
@@ -41,6 +38,7 @@ public class WoodcutterHouseComponent extends HouseComponent {
             }
             return false;
         });
+        super.onAdded();
 
 
     }

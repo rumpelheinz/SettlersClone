@@ -91,7 +91,7 @@ public class TileComponent extends InventoryComponent {
             setActive();
         });
         drawStock();
-        defaultblendmode=getEntity().getViewComponent().getChildren().get(0).getBlendMode();
+        defaultblendmode = getEntity().getViewComponent().getChildren().get(0).getBlendMode();
 //        entity.setUpdateEnabled(false);
     }
 
@@ -104,6 +104,7 @@ public class TileComponent extends InventoryComponent {
 
     ;
     private static ClickMode clickMode;
+
     static void clickpath(TileComponent tileComponent, MouseButton button) {
 
         if (firstClicked == null) {
@@ -112,8 +113,7 @@ public class TileComponent extends InventoryComponent {
                 firstClicked.getEntity().getViewComponent().setOpacity(0.5);
                 clickMode = ClickMode.BUILDPATH;
 
-            }
-            else if (button.equals(MouseButton.SECONDARY)) {
+            } else if (button.equals(MouseButton.SECONDARY)) {
                 firstClicked = tileComponent;
                 firstClicked.getEntity().getViewComponent().getChildren().get(0).blendModeProperty().set(BlendMode.RED);
                 clickMode = ClickMode.DESTROY;
@@ -131,6 +131,10 @@ public class TileComponent extends InventoryComponent {
                     if (firstClicked == secondClicked) {
                         if (firstClicked.pathPassingThrough != null) {
                             firstClicked.pathPassingThrough.destroyPath(true, null);
+                        } else {
+                            if (firstClicked.flag) {
+                                firstClicked.setFlag(false);
+                            }
                         }
                     }
                 }
@@ -185,6 +189,7 @@ public class TileComponent extends InventoryComponent {
     public LinkedList<TileComponent.LengthPair> connections;
 
     void clearPathSearch() {
+        //connections=null;
         predecessor = null;
         hasBeenLookedAt = false;
         predecessorPath = null;
@@ -198,6 +203,7 @@ public class TileComponent extends InventoryComponent {
         //  System.out.print("Search " + searches);
         for (TileComponent flag : allFlags) {
             flag.clearPathSearch();
+            //      flag.clearAreaSearch();
         }
         //    System.out.println("Enndsearch " + searches);
 
@@ -235,7 +241,7 @@ public class TileComponent extends InventoryComponent {
     public void setFlag(boolean flag) {
         setActive();
         if (flag) {
-            if (this.flag ) {
+            if (this.flag) {
             } else {
                 this.flag = true;
                 setActive();
@@ -246,18 +252,29 @@ public class TileComponent extends InventoryComponent {
                 }
             }
         } else {
-            if (this.flag && connections!=null) {
-                LinkedList<TileComponent> connected=new LinkedList<>();
-                LinkedList<LengthPair> oldconnections=new LinkedList<>();
-                for (PathSection pathSection: pathSections){
+            if (house!=null){
+                house.destroy();
+            }
+            if (this.flag && connections != null) {
+                LinkedList<TileComponent> connected = new LinkedList<>();
+                LinkedList<LengthPair> freshConnections = new LinkedList<>();
+                for (PathSection pathSection : (LinkedList<PathSection>) pathSections.clone()) {
                     connected.add(pathSection.getOtherSide(this));
-                    if (pathSection.getOtherSide(this).connections!=null){
-                        oldconnections.addAll(pathSection.getOtherSide(this).connections);
-                    }
-                    pathSection.destroyPath(false,this);
+                    pathSection.destroyPath(false, this);
+                    removePath(pathSection);
                 }
-                for (TileComponent comp:connected) {
-                    
+                for (TileComponent comp : connected) {
+                    boolean recalculate = true;
+                    for (LengthPair pair : freshConnections) {
+                        if (comp == pair.component) {
+                            recalculate = false;
+                            break;
+                        }
+                    }
+                    if (recalculate) {
+                        comp.reCalculatePath();
+                        freshConnections.addAll(comp.connections);
+                    }
                 }
             }
             this.flag = false;
@@ -341,7 +358,10 @@ public class TileComponent extends InventoryComponent {
             if (this.house != null && resource.target == house) {
                 house.addResource(resource);
             } else {
-                getPathsectionTo(resource.target).pathSection.signalResource(resource, this);
+                if (getPathsectionTo(resource.target) != null) {
+                    getPathsectionTo(resource.target).pathSection.signalResource(resource, this);
+                }
+                signalResource(resource, 0);
                 inventoryList.add(resource);
             }
         } else {
@@ -420,7 +440,13 @@ public class TileComponent extends InventoryComponent {
     }
 
     public void calculatePath() {
+
         if (pathSections.size() == 0) {
+            connections = new LinkedList<>();
+            reCalculateStock();
+            if (house != null) {
+                house.reCalculateStock();
+            }
             return;
         }
         System.out.println();
@@ -505,7 +531,12 @@ public class TileComponent extends InventoryComponent {
         return calculatedConnections;
     }
 
+
+
     void destroyFlag() {
+        if (house!=null){
+            house.destroy();
+        }
         setFlag(false);
     }
 

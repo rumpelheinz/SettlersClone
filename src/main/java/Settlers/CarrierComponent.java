@@ -15,7 +15,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 public class CarrierComponent extends Component {
 
     public PathSection pathSection;
-    float speed = 1f / 60.0f;  //Move 1 Tile per second
+    double speed = 1 / 60.0;  //Move 1 Tile per second
     protected TaskType currentTaskType = TaskType.IDLE;
     private Point2D currentPosition2D;
     private TileComponent aTile;
@@ -37,7 +37,7 @@ public class CarrierComponent extends Component {
             Point2D bLoc = currTargetLoc;
             Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
             dir = dir.mul(speed);                        //
-            if (dir.length() >= new Vec2(currentPosition2D.subtract(bLoc)).length()) {   // update next location when the next point is reached
+            if ((dir.length()+0.1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
                 currentPosition2D = currTargetLoc;
                 entity.setPosition(currTargetLoc);
 //                texture.setTranslateX(currentPosition2D.getX());
@@ -45,6 +45,7 @@ public class CarrierComponent extends Component {
                 currentIndex = curTargetIndex;
             } else {
                 currentPosition2D = dir.add(currentPosition2D).toPoint2D();
+//                if
 //                texture.setTranslateX(currentPosition2D.getX());
 //                texture.setTranslateY(currentPosition2D.getY());
 //
@@ -153,6 +154,9 @@ public class CarrierComponent extends Component {
 
     @Override
     public void onUpdate(double tpf) {
+        if (getEntity().getX() < 0 || getEntity().getY() < 0) {
+            System.out.println("Monkey escaped!!!!!");
+        }
         move(tpf);
         if (!waiting()) {
             switch (currentTaskType) {
@@ -180,6 +184,7 @@ public class CarrierComponent extends Component {
                                 targetIndex = 0;
                             } else {
                                 clearTargetResource();
+                                System.out.println("cleared target");
                             }
                         } else {
                             if (targetIndex == 0) {
@@ -191,6 +196,7 @@ public class CarrierComponent extends Component {
 
                                 } else {
                                     clearTargetResource();
+                                    System.out.println("cleared target");
                                 }
                             }
                         }
@@ -259,6 +265,8 @@ public class CarrierComponent extends Component {
     }
 
     public void clearTargetResource() {
+//        System.out.println("cleartargetresource");
+        currentPosition2D = pathPoints2D[currentIndex];
         boolean hasResource = false;
         Resource resource = null;
         TileComponent dropOffTile = null;
@@ -285,7 +293,6 @@ public class CarrierComponent extends Component {
 
     }
 
-    //TODO: Implement resource gathering functionality
     boolean hasResource = false;
     Resource resource = null;
     TileComponent dropOffTile = null;
@@ -295,19 +302,18 @@ public class CarrierComponent extends Component {
             targetIndex = 0;
             resource = newResource;
             dropOffTile = bTile;
-            newResource.reservedByWorker = this;
         } else {
             targetIndex = pathPoints2D.length - 1;
             resource = newResource;
             dropOffTile = aTile;
-            newResource.reservedByWorker = this;
         }
+        newResource.reservedByWorker = this;
         currentTaskType = TaskType.GATHERING;
     }
 
     public void signalResource(Resource newResource, TileComponent fromTile) {
-        if (currentTaskType==TaskType.IDLE)
-            startWaiting(0);
+//        if (currentTaskType==TaskType.IDLE)
+//            startWaiting(0);
 
     }
 
@@ -334,10 +340,10 @@ public class CarrierComponent extends Component {
     public Resource remove() {
         boolean hadResource = hasResource;
         Resource oldResource = resource;
-        if (resource!=null){
+        if (resource != null) {
             resource.setTarget(null);
         }
-        entity.removeFromWorld();
+        getEntity().removeFromWorld();
         if (hadResource)
             return oldResource;
         else return null;

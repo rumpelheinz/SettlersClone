@@ -251,7 +251,7 @@ public class PathSection extends Component {
         if (returnedResource != null) {
             middleTile.addResource(returnedResource);
         }
-        System.out.println("Finished Splitting " + a.x + " " + a.y + " <---->" + b.x + " " + b.y+" "+ returnedResource);
+        System.out.println("Finished Splitting " + a.x + " " + a.y + " <---->" + b.x + " " + b.y + " " + returnedResource);
 
     }
 
@@ -265,24 +265,36 @@ public class PathSection extends Component {
                     b.addResource(ret);
                 } else b.addResource(ret);
             }
-            a.reCalculatePath();
-            if (a.getAllPathsectionsTo(b).size() == 0) {
-                b.reCalculatePath();
-            }
+
 
         }
 
-        if (destroyedFlag != null) {//The flag was destroyed, so the resource is put to the other side
+        if (destroyedFlag != null && ret != null) {//The flag was destroyed, so the resource is put to the other side
             if (destroyedFlag == a) {
                 b.addResource(ret);
             } else a.addResource(ret);
         }
 
         for (TileComponent tile : currentTileList) {
-            tile.pathPassingThrough = null;
+            if ((tile == a && destroyedFlag == b) || (tile == b && destroyedFlag == a)) {
+
+            } else {
+                tile.pathPassingThrough = null;
+            }
         }
-        a.removePath(this);
-        b.removePath(this);
+        if (destroyedFlag == null) {
+            a.removePath(this);
+            b.removePath(this);
+        } else {
+            getOtherSide(destroyedFlag).removePath(this);
+        }
+        if (roadDestroyed) {
+            a.reCalculatePath();
+//            b.reCalculatePath();
+            if (a.getAllPathsectionsTo(b).size() == 0) {
+                b.reCalculatePath();
+            }
+        }
         entity.removeFromWorld();
         //If we did a split, we will place the resource at the center flag
         return ret;

@@ -102,11 +102,16 @@ public class Map {
             return new SearchResult(true, currentTile, target, path);
         }
         while (toLookat.size() > 0) {
-            TileComponent cTile = toLookat.getFirst();
-            toLookat.remove(0);
+            TileComponent cTile = toLookat.removeFirst();
+//            System.out.println("Ctile:"+ cTile.x+","+cTile.y);
+
             for (Direction dir : Direction.values()) {
                 if (cTile.hasPath(dir)) {
                     TileComponent nextTile = cTile.getNeighbour(dir);
+//                    System.out.println("NextTile:     "+ nextTile.x+","+nextTile.y);
+                    if (nextTile.x==3 &&nextTile.y==7){
+//                        System.out.println("3 7!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    }
                     LinkedList<TileComponent> newList = (LinkedList<TileComponent>) cTile.pathHere.clone();
                     boolean alreadypresent = newList.contains(nextTile);
                     newList.addLast(nextTile);
@@ -134,6 +139,8 @@ public class Map {
 
                     }
                     if (!nextTile.lookedAt && (parameter.canGoThrough(cTile) || cTile == currentTile)) {
+//                        System.out.println("Added:            "+ nextTile.x+","+nextTile.y);
+
                         nextTile.pathHere = newList;
                         nextTile.lookedAt = true;
                         toLookat.addLast(nextTile);

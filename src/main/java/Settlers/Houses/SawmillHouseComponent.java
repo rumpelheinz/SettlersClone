@@ -113,7 +113,7 @@ public class SawmillHouseComponent extends HouseComponent {
     @Override
     public int wantResource(Resource resource) {
         switch ( resource.type){
-            case LOG:   return 2;
+            case LOG:   return ((logs+reservedList.size() <6)? 2: 0);
             case PLANK: return 0;
             case STONE: return 0;
         }

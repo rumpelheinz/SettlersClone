@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 public abstract class InventoryComponent extends Component {
     protected LinkedList<Resource> inventoryList = new LinkedList<>();
-    LinkedList<Resource> reservedList = new LinkedList<>();
+    protected LinkedList<Resource> reservedList = new LinkedList<>();
 
     public LinkedList<Resource> getResourcesWithTargets() {
         LinkedList<Resource> resourcesWithTargets = new LinkedList<>();
