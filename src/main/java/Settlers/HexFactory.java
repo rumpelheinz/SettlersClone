@@ -2,10 +2,15 @@ package Settlers;
 
 import Settlers.Types.Hextypes;
 import Settlers.Types.TileType;
+import Settlers.Workers.ForresterComponent;
+import Settlers.Workers.RockCutter;
+import Settlers.Workers.WoodCutterComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
+import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxgl.texture.Texture;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -21,12 +26,12 @@ import static Settlers.Types.Hextypes.TILE;
 
 
 public class HexFactory implements EntityFactory {
-    @Spawns("storehouse")
-    public Entity newStoreHouse(SpawnData data) {
+    @Spawns("house")
+    public Entity newHouse(SpawnData data) {
         return entityBuilder()
-                .type(Hextypes.STOREHOUSE)
                 .from(data)
-                .view(texture("house.png"))
+                .with((Component) data.get("house"))
+                .view((Texture) data.get("view"))
                 //   .with(new StoreHouseComponent())
                 .build();
     }
@@ -37,6 +42,24 @@ public class HexFactory implements EntityFactory {
                 .type(Hextypes.WORKER)
                 .from(data)
                 .with(new WoodCutterComponent())
+                .build();
+    }
+    @Spawns("rockcutter")
+    public Entity newRockCutter(SpawnData data) {
+        return entityBuilder()
+                .type(Hextypes.WORKER)
+                .from(data)
+                .with(new RockCutter())
+                .build();
+    }
+
+
+    @Spawns("forrester")
+    public Entity forrester(SpawnData data) {
+        return entityBuilder()
+                .type(Hextypes.WORKER)
+                .from(data)
+                .with(new ForresterComponent())
                 .build();
     }
 
@@ -66,7 +89,7 @@ public class HexFactory implements EntityFactory {
         Entity tile = entityBuilder()
                 .from(data)
                 .view((Polyline) data.get("view"))
-                .with((PathSection) data.get("component"))
+                .with((PathComponent) data.get("component"))
                 .build();
         return tile;
     }

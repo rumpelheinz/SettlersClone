@@ -1,6 +1,7 @@
 package Settlers.Houses;
 
 import Settlers.*;
+import Settlers.Workers.RockCutter;
 import Settlers.Workers.WoodCutterComponent;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
@@ -10,8 +11,8 @@ import java.util.LinkedList;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
-public class WoodcutterHouseComponent extends HouseComponent {
-    public WoodcutterHouseComponent(TileComponent location, TileComponent flagTile) {
+public class RockCutterHouseComponent extends HouseComponent {
+    public RockCutterHouseComponent(TileComponent location, TileComponent flagTile) {
         this.location=location;
         location.occupied=true;
         this.flagTile=flagTile;
@@ -29,7 +30,7 @@ public class WoodcutterHouseComponent extends HouseComponent {
 
     @Override
     public void onAdded() {
-        WoodCutterComponent worker2 = spawn("worker", location.getEntity().getX(), location.getEntity().getY()) .getComponent(WoodCutterComponent.class);
+        RockCutter worker2 = spawn("rockcutter", location.getEntity().getX(), location.getEntity().getY()) .getComponent(RockCutter.class);
         worker2.setCurrentTile(location);
         worker2.homeTile = location;
         worker2.house = this;
@@ -50,7 +51,7 @@ public class WoodcutterHouseComponent extends HouseComponent {
         super.onAdded();
     }
     public static Texture getNewTexture(int width, int height) {
-        Texture texture = FXGL.texture("objects/housing.png",width,height);
+        Texture texture = FXGL.texture("objects/outhouse.png",width,height);
         return texture;
     }
 

@@ -121,8 +121,8 @@ public class Map {
                             newList.addFirst(currentTile);
                             LinkedList<TileComponent.LengthPair> allPathSectionsTo = currentTile.getAllPathsectionsTo(nextTile);
                             for (TileComponent.LengthPair pair : allPathSectionsTo) {
-                                if (pair.pathSection != null) {
-                                    if (pair.pathSection.identicalPath(newList)) {
+                                if (pair.pathComponent != null) {
+                                    if (pair.pathComponent.identicalPath(newList)) {
                                         validtarget = false;
                                     }
                                 }

@@ -17,25 +17,25 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 public class MyLevelLoader {
     public Map load(File file) {
         InputStream is = null;
-        String in= "";
+        String in = "";
         try {
             is = new FileInputStream(file);
 
             BufferedReader buf = new BufferedReader(new InputStreamReader(is));
 
             String line = null;
+            line = buf.readLine();
+
+            StringBuilder sb = new StringBuilder();
+
+            while (line != null) {
+                sb.append(line).append("\n");
                 line = buf.readLine();
+            }
 
-                StringBuilder sb = new StringBuilder();
-
-                while (line != null) {
-                    sb.append(line).append("\n");
-                    line = buf.readLine();
-                }
-
-                String fileAsString = sb.toString();
-                in=fileAsString;
-            } catch (IOException e) {
+            String fileAsString = sb.toString();
+            in = fileAsString;
+        } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("Contents : " + in);
@@ -43,54 +43,53 @@ public class MyLevelLoader {
         try {
             JSONObject obj = (JSONObject) parser.parse(in);
             JSONArray layers = (JSONArray) obj.get("layers");
-            JSONObject tilelayer= (JSONObject) layers.get(0);
-            Long heightl= (Long) tilelayer.get("height");
-            int height= Math.toIntExact(heightl);
-            Long widthl= (Long) tilelayer.get("width");
-            int width= Math.toIntExact(widthl);
-            System.out.println("Width: "+width + " height: "+height);
+            JSONObject tilelayer = (JSONObject) layers.get(0);
+            Long heightl = (Long) tilelayer.get("height");
+            int height = Math.toIntExact(heightl);
+            Long widthl = (Long) tilelayer.get("width");
+            int width = Math.toIntExact(widthl);
+            System.out.println("Width: " + width + " height: " + height);
             JSONArray data = (JSONArray) tilelayer.get("data");
-            int x=0;
-            int y=0;
+            int x = 0;
+            int y = 0;
 
-            Map map=new Map(width,height);
-            while(data.size()>0){
-                Long typeInt= (Long) data.get(0);
+            Map map = new Map(width, height);
+            while (data.size() > 0) {
+                Long typeInt = (Long) data.get(0);
                 data.remove(0);
 
                 TileType tileType;
                 if (typeInt == 2) {
                     tileType = TileType.WATER;
-                    map.addTile(x,y,tileType);
+                    map.addTile(x, y, tileType);
                 } else if (typeInt == 34) {
                     tileType = TileType.GRASS;
-                    map.addTile(x,y,tileType);
+                    map.addTile(x, y, tileType);
                 } else if (typeInt == 18) {//Forrest
                     tileType = TileType.GRASS;
-                    TileComponent tile=map.addTile(x,y,tileType);
+                    TileComponent tile = map.addTile(x, y, tileType);
                     tile.getEntity().addComponent(new TreeComponent(1));
-                }
-                else if (typeInt == 4) {//Hut
+                } else if (typeInt == 4) {//Hut
                     tileType = TileType.GRASS;
-                    TileComponent tile=map.addTile(x,y,tileType);
-                    tile.getEntity().addComponent(new WoodcutterHouseComponent());
-                }else if (typeInt == 8) {//StoreHouse
+                    TileComponent tile = map.addTile(x, y, tileType);
+                } else if (typeInt == 8) {//StoreHouse
                     tileType = TileType.GRASS;
-                    TileComponent tile=map.addTile(x,y,tileType);
-                    tile.getEntity().addComponent(new StoreHouseComponent());
-                }else if (typeInt == 9) {//StoreHouse
+                    TileComponent tile = map.addTile(x, y, tileType);
+                } else if (typeInt == 50) {//StoreHouse
                     tileType = TileType.GRASS;
-                    TileComponent tile=map.addTile(x,y,tileType);
-                    tile.getEntity().addComponent(new SawmillHouseComponent());
-                }
-                else {
+                    TileComponent tile = map.addTile(x, y, tileType);
+                    tile.getEntity().addComponent(new RockComponent(9));
+                } else if (typeInt == 9) {//StoreHouse
+                    tileType = TileType.GRASS;
+                    TileComponent tile = map.addTile(x, y, tileType);
+                } else {
                     tileType = TileType.WATER;
-                    map.addTile(x,y,tileType);
+                    map.addTile(x, y, tileType);
                     System.out.println("Unexpected value: " + typeInt);
                 }
                 x++;
-                if (x==width){
-                    x=0;
+                if (x == width) {
+                    x = 0;
                     y++;
                 }
             }

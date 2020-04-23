@@ -1,5 +1,6 @@
 package Settlers;
 
+import Settlers.Types.ResourceType;
 import com.almasb.fxgl.entity.component.Component;
 
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.LinkedList;
 public abstract class InventoryComponent extends Component {
     protected LinkedList<Resource> inventoryList = new LinkedList<>();
     protected LinkedList<Resource> reservedList = new LinkedList<>();
+
 
     public LinkedList<Resource> getResourcesWithTargets() {
         LinkedList<Resource> resourcesWithTargets = new LinkedList<>();
@@ -19,14 +21,33 @@ public abstract class InventoryComponent extends Component {
     }
 
 
-    public void setReserved(Resource resource,boolean reserved) {
-        if (reserved){
+    public void setReserved(Resource resource, boolean reserved) {
+        if (reserved) {
             this.reservedList.add(resource);
-        }
-        else {
+        } else {
             this.reservedList.remove(resource);
         }
 
+    }
+
+    public LinkedList<Resource> getResourcesFromInventory(ResourceType type) {
+        LinkedList<Resource> ret = new LinkedList<>();
+        for (Resource resource : inventoryList) {
+            if (resource.type.equals(type)) {
+                ret.add(resource);
+            }
+        }
+        return ret;
+    }
+
+    public LinkedList<Resource> getResourcesFromReserve(ResourceType type) {
+        LinkedList<Resource> ret = new LinkedList<>();
+        for (Resource resource : reservedList) {
+            if (resource.type.equals(type)) {
+                ret.add(resource);
+            }
+        }
+        return ret;
     }
 
     public abstract boolean pickUp(Resource resource);

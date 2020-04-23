@@ -14,8 +14,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
 public class CarrierComponent extends Component {
 
-    public PathSection pathSection;
-    double speed = 1 / 60.0;  //Move 1 Tile per second
+    public PathComponent pathComponent;
     protected TaskType currentTaskType = TaskType.IDLE;
     private Point2D currentPosition2D;
     private TileComponent aTile;
@@ -23,9 +22,10 @@ public class CarrierComponent extends Component {
     Point2D[] pathPoints2D;
     int currentIndex;
     private int targetIndex;
-    private int timesincelastredraw;
+    private int timeSinceLastRedraw;
+    double speed = 1 / 60.0;  //Move 1 Tile per second
 
-    void move(double tpf) {  //called once per onUpdate
+    void move(double tpf) {
         if (targetIndex == currentIndex) {
             return;
         }
@@ -40,22 +40,14 @@ public class CarrierComponent extends Component {
             if ((dir.length()+0.1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
                 currentPosition2D = currTargetLoc;
                 entity.setPosition(currTargetLoc);
-//                texture.setTranslateX(currentPosition2D.getX());
-//                texture.setTranslateY(currentPosition2D.getY());
                 currentIndex = curTargetIndex;
             } else {
                 currentPosition2D = dir.add(currentPosition2D).toPoint2D();
-//                if
-//                texture.setTranslateX(currentPosition2D.getX());
-//                texture.setTranslateY(currentPosition2D.getY());
-//
-                timesincelastredraw++;
-                if (timesincelastredraw > stepsBetweenRedraw) {
-                    timesincelastredraw = 0;
-                    entity.setPosition(currentPosition2D); //Uncommenting this line increases CPUusage significantly
+                timeSinceLastRedraw++;
+                if (timeSinceLastRedraw > stepsBetweenRedraw) {
+                    timeSinceLastRedraw = 0;
+                    entity.setPosition(currentPosition2D);
                 }
-
-//                entity.setPosition(currentPosition2D); //Uncommenting this line increases CPUusage significantly
             }
         }
     }
@@ -93,7 +85,7 @@ public class CarrierComponent extends Component {
         for (Resource resource : tileComponent.inventoryList) {
             TileComponent.LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
             if (resource.target != null && sourceLengthPair != null && resource.reservedByWorker == null) {
-                TileComponent compareTile = pathSection.getOtherSide(tileComponent);
+                TileComponent compareTile = pathComponent.getOtherSide(tileComponent);
                 TileComponent.LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
                 if (compareLengthPair != null) {
                     if (compareLengthPair.distance < sourceLengthPair.distance) {
@@ -112,7 +104,7 @@ public class CarrierComponent extends Component {
             if (resource.target != null) {
                 TileComponent.LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
                 if (resource.target != null && sourceLengthPair != null && resource.reservedByWorker == null) {
-                    TileComponent compareTile = pathSection.getOtherSide(tileComponent);
+                    TileComponent compareTile = pathComponent.getOtherSide(tileComponent);
                     TileComponent.LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
                     if (compareLengthPair != null) {
                         if (compareLengthPair.distance < sourceLengthPair.distance) {
@@ -135,7 +127,7 @@ public class CarrierComponent extends Component {
                 if (resource.target != null) {
                     TileComponent.LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
                     if (resource.target != null && sourceLengthPair != null && resource.reservedByWorker == null) {
-                        TileComponent compareTile = pathSection.getOtherSide(tileComponent);
+                        TileComponent compareTile = pathComponent.getOtherSide(tileComponent);
                         TileComponent.LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
                         if (compareLengthPair != null) {
                             if (compareLengthPair.distance < sourceLengthPair.distance) {
@@ -276,17 +268,17 @@ public class CarrierComponent extends Component {
 
     Point2D middle;
 
-    public void setPathSection(PathSection pathSection) {
-        this.pathSection = pathSection;
+    public void setPathComponent(PathComponent pathComponent) {
+        this.pathComponent = pathComponent;
         LinkedList<Point2D> tempLocations = new LinkedList<Point2D>();
-        pathPoints2D = new Point2D[pathSection.currentTileList.size()];
+        pathPoints2D = new Point2D[pathComponent.currentTileList.size()];
         int i = 0;
-        for (TileComponent tile : pathSection.currentTileList) {
+        for (TileComponent tile : pathComponent.currentTileList) {
             pathPoints2D[i] = tile.getEntity().getPosition();
             i++;
         }
-        aTile = pathSection.a;
-        bTile = pathSection.b;
+        aTile = pathComponent.a;
+        bTile = pathComponent.b;
         middle = pathPoints2D[pathPoints2D.length / 2];
         currentIndex = pathPoints2D.length / 2;
         currentPosition2D = middle;

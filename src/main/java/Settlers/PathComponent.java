@@ -1,52 +1,43 @@
 package Settlers;
 
-import Settlers.Houses.StoreHouseComponent;
 import Settlers.Types.Direction;
 import Settlers.Types.TileType;
-import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
-import javafx.scene.shape.Rectangle;
 
 import java.util.LinkedList;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
-public class PathSection extends Component {
+public class PathComponent extends Component {
     TileComponent a;
     TileComponent b;
     LinkedList<TileComponent> currentTileList;
     CarrierComponent carrier;
 
-    public PathSection(LinkedList<TileComponent> tileList) {
+    public PathComponent(LinkedList<TileComponent> tileList) {
         currentTileList = new LinkedList<TileComponent>();
-//        pathComponentList = new LinkedList<PathComponent>();
         Color color = Color.rgb(BasicGameApp.random.nextInt(256), BasicGameApp.random.nextInt(256), BasicGameApp.random.nextInt(256));
         a = tileList.getFirst();
         b = tileList.getLast();
         if (a.pathPassingThrough != null) {
             a.pathPassingThrough.split(a);
         }
-        //       a.pathPassingThrough=null;
-//        b.pathPassingThrough=null;
         TileComponent mCurrentTile = tileList.removeFirst();
         currentTileList.add(mCurrentTile);
         while (tileList.size() > 0) {
             TileComponent mNextTile = tileList.removeFirst();
             currentTileList.add(mNextTile);
             if (mNextTile.pathPassingThrough == null) {
-//                PathComponent pathComponent = new PathComponent(mCurrentTile, mNextTile, color, this);
-//                pathComponentList.addLast(pathComponent);
                 if (mNextTile != b) {
                     mNextTile.pathPassingThrough = this;
                 }
             } else {
-                PathSection oldpassingthrough = mNextTile.pathPassingThrough;
+                PathComponent oldpassingthrough = mNextTile.pathPassingThrough;
                 mNextTile.pathPassingThrough = null;
                 oldpassingthrough.split(mNextTile);
 //                PathComponent pathComponent = new PathComponent(mCurrentTile, mNextTile, color, this);
@@ -65,7 +56,7 @@ public class PathSection extends Component {
         flagb.addPath(this);
         TileComponent middle = currentTileList.get(currentTileList.size() / 2);
         carrier = spawn("carrier", middle.getEntity().getX(), middle.getEntity().getY()).getComponent(CarrierComponent.class);
-        carrier.setPathSection(this);
+        carrier.setPathComponent(this);
         TileComponent.clearAllSearches();
         Group group = new Group();
         SpawnData data = new SpawnData(a.getEntity().getX(), a.getEntity().getY());
@@ -103,18 +94,14 @@ public class PathSection extends Component {
         else return null;
     }
 
-    static PathSection buildPath(TileComponent from, TileComponent to) {
+    public static PathComponent buildPath(TileComponent from, TileComponent to) {
         if (from == to) {
-            for (Direction dir : Direction.values()) {
-                TileComponent comp = from.getNeighbour(dir);
-                if (comp != null && (comp.flag)) {
-                    return null;
-                }
-
+            if (from.canBuildFlag()) {
+                from.setFlag(true);
+                from.reCalculatePath();
             }
-            from.setFlag(true);
-            from.reCalculatePath();
             return null;
+
         } else {
             SearchResult result = Map.findPath(new SearchQuery() {
                 private TileComponent startTile;
@@ -134,7 +121,7 @@ public class PathSection extends Component {
 
                 @Override
                 public boolean canGoThrough(TileComponent compareTile) {
-                    return ((compareTile.pathPassingThrough == null) && !compareTile.flag && compareTile.type != TileType.WATER);
+                    return ((compareTile.pathPassingThrough == null) && !compareTile.flag && compareTile.type != TileType.WATER &&!compareTile.occupied&&!compareTile.getEntity().hasComponent(TreeComponent.class));
                 }
 
                 @Override
@@ -157,7 +144,7 @@ public class PathSection extends Component {
             }, from, true);
             if (result.success) {
                 result.path.addFirst(from);
-                PathSection path = new PathSection(result.path);
+                PathComponent path = new PathComponent(result.path);
                 from.reCalculatePath();
 
                 return (path);
@@ -246,8 +233,8 @@ public class PathSection extends Component {
         }
 //        middleTile.setFlag(true);
         Resource returnedResource = destroyPath(false, null);
-        new PathSection(listA);
-        new PathSection(listB);
+        new PathComponent(listA);
+        new PathComponent(listB);
         if (returnedResource != null) {
             middleTile.addResource(returnedResource);
         }
@@ -256,7 +243,7 @@ public class PathSection extends Component {
     }
 
 
-    Resource destroyPath(boolean roadDestroyed, TileComponent destroyedFlag) {
+    public Resource destroyPath(boolean roadDestroyed, TileComponent destroyedFlag) {
         TileComponent tileBeingCarriedTo = carrier.dropOffTile;
         Resource ret = carrier.remove();
         if (roadDestroyed) {// Only a road destruction, ie no split

@@ -1,19 +1,16 @@
 package Settlers.Houses;
 
-import Settlers.Resource;
-import Settlers.TileComponent;
+import Settlers.*;
+import Settlers.Workers.ForresterComponent;
+import Settlers.Workers.WoodCutterComponent;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.texture.Texture;
-import org.w3c.dom.Text;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
-public class StoreHouseComponent extends HouseComponent{
-
-
-
-    public StoreHouseComponent(TileComponent location, TileComponent flagTile) {
+public class ForresterHouseComponent extends HouseComponent {
+    public ForresterHouseComponent(TileComponent location, TileComponent flagTile) {
         this.location=location;
         location.occupied=true;
         this.flagTile=flagTile;
@@ -27,36 +24,36 @@ public class StoreHouseComponent extends HouseComponent{
         spawn("house",data);
     }
 
-    public static Texture getNewTexture(int width, int height) {
-        Texture texture = FXGL.texture("objects/oldBuilding.png",width,height);
-        return texture;
-    }
+
 
     @Override
     public void onAdded() {
+        ForresterComponent worker = spawn("forrester", location.getEntity().getX(), location.getEntity().getY()) .getComponent(ForresterComponent.class);
+        worker.setCurrentTile(location);
+        worker.homeTile = location;
+        worker.house = this;
+        super.onAdded();
     }
+    public static Texture getNewTexture(int width, int height) {
+        Texture texture = FXGL.texture("objects/windmill_base.png",width,height);
+        return texture;
+    }
+
 
     @Override
     public int wantResource(Resource resource) {
-        switch ( resource.type){
-            case LOG:   return 1;
-            case PLANK: return 1;
-            case STONE: return 1;
-        }
         return 0;
     }
 
+
     @Override
-    public void addResource(Resource resource) {
-        inventoryList.add(resource);
-        resource.setTarget(null);
-//        flagComponent.signalResource(resource);
+    public void addResource(Resource resource)  {
+        throw new Error();
     }
 
     @Override
     public boolean pickUp(Resource resource) {
         return inventoryList.remove(resource);
     }
-
 
 }

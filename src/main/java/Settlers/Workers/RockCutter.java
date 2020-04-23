@@ -1,6 +1,8 @@
-package Settlers;
+package Settlers.Workers;
 
+import Settlers.Houses.RockCutterHouseComponent;
 import Settlers.Houses.WoodcutterHouseComponent;
+import Settlers.*;
 import Settlers.Types.ResourceType;
 import Settlers.Types.TaskType;
 import Settlers.Types.TileType;
@@ -14,7 +16,7 @@ import java.util.LinkedList;
 import static Settlers.BasicGameApp.stepsBetweenRedraw;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
-public class WoodCutterComponent extends Component {
+public class RockCutter extends Component {
 
     private TileComponent target;
     private TileComponent currentTile;
@@ -23,11 +25,11 @@ public class WoodCutterComponent extends Component {
     private boolean hasTree = false;
     protected TaskType currentTaskType = TaskType.IDLE;
     public TileComponent homeTile;
-    public WoodcutterHouseComponent house;
+    public RockCutterHouseComponent house;
     private int timesincelastredraw = 0;
     private boolean inside;
 
-    public WoodCutterComponent() {
+    public RockCutter() {
 
     }
 
@@ -35,7 +37,7 @@ public class WoodCutterComponent extends Component {
 
     @Override
     public void onAdded() {
-        texture = texture("pirates/024-crab.png", 32, 32);
+        texture = texture("pirates/029-seagull.png", 32, 32);
 //        Circle body = new Circle(10);
 //        body.setStroke(Color.RED);
 //        body.setStrokeWidth(5);
@@ -108,7 +110,7 @@ public class WoodCutterComponent extends Component {
 
         @Override
         public boolean canGoThrough(TileComponent compareTile) {
-            return (compareTile.type != TileType.WATER);
+            return (compareTile.type != TileType.WATER)&& !compareTile.occupied;
         }
 
         @Override
@@ -122,8 +124,7 @@ public class WoodCutterComponent extends Component {
     private SearchQuery findTreeQuery = new SearchQuery() {
         @Override
         public boolean isValidTarget(TileComponent compareTile) {
-            TreeComponent treeComponent = compareTile.getEntity().hasComponent(TreeComponent.class) ? compareTile.getEntity().getComponent(TreeComponent.class) : null;
-            return treeComponent != null && treeComponent.trees > 0;
+            return compareTile.getEntity().hasComponent(RockComponent.class);
         }
 
         @Override
@@ -137,7 +138,7 @@ public class WoodCutterComponent extends Component {
             return true;
         }
     };
-    Texture log = texture("log.png", 64, 64);
+    Texture log = texture("rock.png", 64, 64);
 
     @Override
     public void onUpdate(double tpf) {
@@ -147,13 +148,13 @@ public class WoodCutterComponent extends Component {
                 case GATHERING:
                     move(tpf);
                     if (target == currentTile) {
-                        currentTile.getEntity().getComponent(TreeComponent.class);
-                        TreeComponent tree = currentTile.getEntity().getComponent(TreeComponent.class);
-                        if (tree != null && tree.trees > 0 && !hasTree) {
-                            tree.setTrees(tree.trees - 1);
+                        RockComponent tree=null;
+                        if (currentTile.getEntity().hasComponent(RockComponent.class))
+                            tree = currentTile.getEntity().getComponent(RockComponent.class);
+                        if (tree != null && !hasTree) {
                             hasTree = true;
                             entity.getViewComponent().addChild(log);
-
+                            tree.remove();
                             startWaiting(2000);
                         } else {
                             if (findPath(findTreeQuery)) {
@@ -199,7 +200,7 @@ public class WoodCutterComponent extends Component {
                         entity.removeFromWorld();
                     } else {
                         if (hasTree) {
-                            house.addResource(new Resource(ResourceType.LOG));
+                            house.addResource(new Resource(ResourceType.STONE));
                             entity.getViewComponent().removeChild(log);
                         }
                         hasTree = false;
