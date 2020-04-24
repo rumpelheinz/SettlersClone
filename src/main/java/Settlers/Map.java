@@ -119,8 +119,8 @@ public class Map {
                     if (validtarget) {
                         if (avoidExistingPaths) {
                             newList.addFirst(currentTile);
-                            LinkedList<TileComponent.LengthPair> allPathSectionsTo = currentTile.getAllPathsectionsTo(nextTile);
-                            for (TileComponent.LengthPair pair : allPathSectionsTo) {
+                            LinkedList<LengthPair> allPathSectionsTo = currentTile.getAllPathsectionsTo(nextTile);
+                            for (LengthPair pair : allPathSectionsTo) {
                                 if (pair.pathComponent != null) {
                                     if (pair.pathComponent.identicalPath(newList)) {
                                         validtarget = false;

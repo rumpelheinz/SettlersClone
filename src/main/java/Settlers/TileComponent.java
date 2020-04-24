@@ -2,9 +2,11 @@ package Settlers;
 
 import Settlers.Houses.*;
 import Settlers.Types.Direction;
+import Settlers.Types.HouseSize;
 import Settlers.Types.HouseType;
 import Settlers.Types.TileType;
 import Settlers.UI.UIManager;
+import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
@@ -57,7 +59,7 @@ public class TileComponent extends InventoryComponent {
         flagTexture.setTranslateX(-TILEHEIGHT / 3 / 2);
         pathComponents = new LinkedList<PathComponent>();
         allFlags.add(this);
-        connections=new LinkedList<>();
+        connections = new LinkedList<>();
 
         int coordx = (x * (TILEWIDTH));
         int coordy = (int) (Math.round(y * TILEWIDTH * (0.83)));
@@ -79,7 +81,7 @@ public class TileComponent extends InventoryComponent {
     }
 
     Group stock;
-
+    TileComponent externalthis=this;
     @Override
     public void onAdded() {
         stock = new Group();
@@ -90,6 +92,12 @@ public class TileComponent extends InventoryComponent {
             System.out.println("x" + x + "y" + y);
             UIManager.clickPath(this, e.getButton());
             setActive();
+        });
+        entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+            UIManager.mouseOverTile(this,true);
+        });
+        entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
+            UIManager.mouseOverTile(this,false);
         });
         drawStock();
         UIManager.defaultblendmode = getEntity().getViewComponent().getChildren().get(0).getBlendMode();
@@ -135,8 +143,8 @@ public class TileComponent extends InventoryComponent {
     LinkedList<PathComponent> pathComponents;
     public HouseComponent house;
     PathComponent predecessorPath;
-    LinkedList<TileComponent.LengthPair> calculatedConnections;
-    public LinkedList<TileComponent.LengthPair> connections;
+    LinkedList<LengthPair> calculatedConnections;
+    public LinkedList<LengthPair> connections;
 
     void clearPathSearch() {
         //connections=null;
@@ -175,6 +183,7 @@ public class TileComponent extends InventoryComponent {
             }
         }
     }
+
 
 
     public void setFlag(boolean flag) {
@@ -219,7 +228,6 @@ public class TileComponent extends InventoryComponent {
             this.flag = false;
         }
         setActive();
-
     }
 
     public void addPath(PathComponent section) {
@@ -235,13 +243,23 @@ public class TileComponent extends InventoryComponent {
         }
     }
 
+    public boolean hasResourceComponent() {
+        return (entity.hasComponent(RockComponent.class) || entity.hasComponent(TreeComponent.class));
+    }
+
+    public WorkerComponent targetedByGather;
+
+    public WorkerComponent targetedByGatherer() {
+        return targetedByGather;
+    }
+
     public void signalResource(Resource resource, int maxPriority) {
 
         int maxDistance = Integer.MAX_VALUE;
         HouseComponent target = null;
         if (connections != null) {
             for (LengthPair location : connections) {
-                if (location.type == LengthPairType.BUILDING) {
+                if (location.type == LengthPair.LengthPairType.BUILDING) {
                     HouseComponent curTarget = (HouseComponent) location.component;
                     if (curTarget.wantResource(resource) > maxPriority || (location.distance < maxDistance && curTarget.wantResource(resource) >= maxPriority)) {
                         target = curTarget;
@@ -343,23 +361,6 @@ public class TileComponent extends InventoryComponent {
         return ret;
     }
 
-    private enum LengthPairType {
-        BUILDING, FLAG
-    }
-
-    public static class LengthPair {
-        int distance;
-        public Component component;
-        public PathComponent pathComponent;
-        public LengthPairType type;
-
-        private LengthPair(int distance, Component component, PathComponent pathComponent, LengthPairType type) {
-            this.distance = distance;
-            this.component = component;
-            this.pathComponent = pathComponent;
-            this.type = type;
-        }
-    }
 
     public void setHouse(HouseComponent houseComponent) {
         this.house = houseComponent;
@@ -370,7 +371,7 @@ public class TileComponent extends InventoryComponent {
         clearAllSearches();
         calculatePath();
         if (connections != null)
-            for (TileComponent.LengthPair comp : connections) {
+            for (LengthPair comp : connections) {
                 if (comp.component instanceof TileComponent) {
                     clearAllSearches();
                     ((TileComponent) comp.component).calculatePath();
@@ -430,7 +431,7 @@ public class TileComponent extends InventoryComponent {
             } else {
                 connections = calculatedConnections;
                 if (house != null) {
-                    connections.add(new LengthPair(0, house, null, LengthPairType.BUILDING));
+                    connections.add(new LengthPair(0, house, null, LengthPair.LengthPairType.BUILDING));
                 }
                 System.out.println("null");
             }
@@ -456,26 +457,22 @@ public class TileComponent extends InventoryComponent {
 
 
     private void setCalculatedConnections
-            (LinkedList<TileComponent.LengthPair> predecessorCalculatedConnections, PathComponent predecessorPath) {
+            (LinkedList<LengthPair> predecessorCalculatedConnections, PathComponent predecessorPath) {
         for (LengthPair lengthPair : predecessorCalculatedConnections) {
             calculatedConnections.add(new LengthPair(lengthPair.distance + 1, lengthPair.component, predecessorPath, lengthPair.type));
         }
     }
 
-    private LinkedList<TileComponent.LengthPair> getCalculatedConnections() {
+    private LinkedList<LengthPair> getCalculatedConnections() {
         if (this.house != null) {
-            calculatedConnections.add(new LengthPair(0, house, null, LengthPairType.BUILDING));
+            calculatedConnections.add(new LengthPair(0, house, null, LengthPair.LengthPairType.BUILDING));
         }
-        calculatedConnections.add(new LengthPair(0, this, null, LengthPairType.FLAG));
+        calculatedConnections.add(new LengthPair(0, this, null, LengthPair.LengthPairType.FLAG));
         return calculatedConnections;
     }
 
-    public enum HouseSize {
-        HUT, House, CASTLE, FLAG, NONE
-    }
-
-    boolean canBuildFlag() {
-        if (flag || occupied||type==TileType.WATER||entity.hasComponent(TreeComponent.class))
+    public boolean canBuildFlag() {
+        if (flag || occupied || type == TileType.WATER || entity.hasComponent(TreeComponent.class))
             return false;
         for (Direction dir : Direction.values()) {
             TileComponent comp = getNeighbour(dir);
@@ -487,7 +484,7 @@ public class TileComponent extends InventoryComponent {
     }
 
     public boolean canBuildHouse(HouseSize size) {
-        if (flag || occupied || pathPassingThrough != null || (entity.hasComponent(TreeComponent.class))) {
+        if (flag || occupied || pathPassingThrough != null || (hasResourceComponent())) {
             return false;
         }
         if (getNeighbour(Direction.SE) == null || ((!getNeighbour(Direction.SE).flag) && (!getNeighbour(Direction.SE).canBuildFlag())))
@@ -511,6 +508,13 @@ public class TileComponent extends InventoryComponent {
                 getNeighbour(Direction.SW).occupied) {
             return false;
         }
+        if (size == HouseSize.House || size == HouseSize.CASTLE) {
+            for (Direction dir : new Direction[]{Direction.W, Direction.NW, Direction.NE}) {
+                TileComponent tile = getNeighbour(dir);
+                if (tile == null || tile.flag || tile.occupied || tile.pathPassingThrough != null || (tile.hasResourceComponent()))
+                    return false;
+            }
+        }
 //        if (!(getNeighbour(Direction.SE) == null &&
 //                getNeighbour(Direction.SE).flag && !
 //                getNeighbour(Direction.SE).occupied)) {
@@ -518,6 +522,7 @@ public class TileComponent extends InventoryComponent {
 //        }
         return true;
     }
+
 
     public void buildHouse(HouseType type, boolean instant) {
         System.out.println("Building " + type.toString());
@@ -527,19 +532,19 @@ public class TileComponent extends InventoryComponent {
 
         switch (type) {
             case WOODCUTTER:
-                new WoodcutterHouseComponent(this, getNeighbour(Direction.SE));
+                new WoodcutterHouseComponent(this, getNeighbour(Direction.SE),false);
                 break;
             case STOREHOUSE:
-                new StoreHouseComponent(this, getNeighbour(Direction.SE));
+                new StoreHouseComponent(this, getNeighbour(Direction.SE),false);
                 break;
             case SAWMILL:
-                new SawmillHouseComponent(this, getNeighbour(Direction.SE));
+                new SawmillHouseComponent(this, getNeighbour(Direction.SE),false);
                 break;
             case FORRESTER:
-                new ForresterHouseComponent(this, getNeighbour(Direction.SE));
+                new ForresterHouseComponent(this, getNeighbour(Direction.SE),false);
                 break;
             case ROCKCUTTER:
-                new RockCutterHouseComponent(this, getNeighbour(Direction.SE));
+                new RockCutterHouseComponent(this, getNeighbour(Direction.SE),false);
                 break;
         }
         System.out.println("Built " + type.toString());

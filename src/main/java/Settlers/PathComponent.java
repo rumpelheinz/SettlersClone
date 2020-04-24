@@ -9,18 +9,20 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polyline;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 public class PathComponent extends Component {
-    TileComponent a;
+    public TileComponent a;
     TileComponent b;
-    LinkedList<TileComponent> currentTileList;
+    public List<TileComponent> currentTileList;
     CarrierComponent carrier;
 
     public PathComponent(LinkedList<TileComponent> tileList) {
-        currentTileList = new LinkedList<TileComponent>();
+        currentTileList = new ArrayList<>();
         Color color = Color.rgb(BasicGameApp.random.nextInt(256), BasicGameApp.random.nextInt(256), BasicGameApp.random.nextInt(256));
         a = tileList.getFirst();
         b = tileList.getLast();
@@ -121,7 +123,7 @@ public class PathComponent extends Component {
 
                 @Override
                 public boolean canGoThrough(TileComponent compareTile) {
-                    return ((compareTile.pathPassingThrough == null) && !compareTile.flag && compareTile.type != TileType.WATER &&!compareTile.occupied&&!compareTile.getEntity().hasComponent(TreeComponent.class));
+                    return ((compareTile.pathPassingThrough == null) && !compareTile.flag && compareTile.type != TileType.WATER &&!compareTile.occupied&&!compareTile.hasResourceComponent());
                 }
 
                 @Override
@@ -212,13 +214,13 @@ public class PathComponent extends Component {
         LinkedList<TileComponent> listB = new LinkedList<TileComponent>();
         boolean foundTile = false;
 
-        LinkedList<TileComponent> oldList = (LinkedList<TileComponent>) currentTileList.clone();
+        List<TileComponent> oldList = new ArrayList<>(currentTileList);
 
-        TileComponent currentTileComponent = oldList.removeFirst();
+        TileComponent currentTileComponent = oldList.remove(0);
         listA.add(currentTileComponent);
 
         while (!foundTile) {
-            currentTileComponent = oldList.removeFirst();
+            currentTileComponent = oldList.remove(0);
             listA.add(currentTileComponent);
             if (currentTileComponent == middleTile) {
                 foundTile = true;
@@ -228,7 +230,7 @@ public class PathComponent extends Component {
 
 
         while (oldList.size() > 0) {
-            currentTileComponent = oldList.removeFirst();
+            currentTileComponent = oldList.remove(0);
             listB.add(currentTileComponent);
         }
 //        middleTile.setFlag(true);

@@ -83,10 +83,10 @@ public class CarrierComponent extends Component {
     private Resource checkForResources(TileComponent tileComponent) {
 //        tileComponent.getResourcesWithTargets();
         for (Resource resource : tileComponent.inventoryList) {
-            TileComponent.LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
+            LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
             if (resource.target != null && sourceLengthPair != null && resource.reservedByWorker == null) {
                 TileComponent compareTile = pathComponent.getOtherSide(tileComponent);
-                TileComponent.LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
+                LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
                 if (compareLengthPair != null) {
                     if (compareLengthPair.distance < sourceLengthPair.distance) {
                         return resource;
@@ -102,10 +102,10 @@ public class CarrierComponent extends Component {
                     tileComponent.signalResource(resource, 0);
                 }
             if (resource.target != null) {
-                TileComponent.LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
+                LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
                 if (resource.target != null && sourceLengthPair != null && resource.reservedByWorker == null) {
                     TileComponent compareTile = pathComponent.getOtherSide(tileComponent);
-                    TileComponent.LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
+                    LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
                     if (compareLengthPair != null) {
                         if (compareLengthPair.distance < sourceLengthPair.distance) {
                             return resource;
@@ -125,10 +125,10 @@ public class CarrierComponent extends Component {
                         tileComponent.signalResource(resource, house.wantResource(resource));
                     }
                 if (resource.target != null) {
-                    TileComponent.LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
+                    LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
                     if (resource.target != null && sourceLengthPair != null && resource.reservedByWorker == null) {
                         TileComponent compareTile = pathComponent.getOtherSide(tileComponent);
-                        TileComponent.LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
+                        LengthPair compareLengthPair = compareTile.getPathsectionTo(resource.target);
                         if (compareLengthPair != null) {
                             if (compareLengthPair.distance < sourceLengthPair.distance) {
                                 return resource;

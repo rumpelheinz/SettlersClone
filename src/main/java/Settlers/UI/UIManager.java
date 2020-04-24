@@ -3,6 +3,7 @@ package Settlers.UI;
 import Settlers.Houses.*;
 import Settlers.PathComponent;
 import Settlers.TileComponent;
+import Settlers.Types.HouseSize;
 import Settlers.Types.HouseType;
 import com.almasb.fxgl.texture.Texture;
 import javafx.collections.ObservableList;
@@ -12,6 +13,7 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getAppHeight;
@@ -24,6 +26,31 @@ public class UIManager {
 
     static TileComponent firstClicked;
     static TileComponent secondClicked;
+
+    static Text mouseOverTexture;
+
+    public static void mouseOverTile(TileComponent tileComponent, boolean entered) {
+
+        if (entered) {
+            int scale = 3;
+            String text = "X";
+            if (tileComponent.canBuildFlag()) {
+                text = "|";
+                scale = 4;
+            }
+            if (tileComponent.canBuildHouse(HouseSize.HUT))
+                text = "o";
+            if (tileComponent.canBuildHouse(HouseSize.House)) {
+                text = "O";
+                scale = 5;
+            }
+
+            mouseOverTexture = new Text(text);
+            mouseOverTexture.setScaleX(scale);
+            mouseOverTexture.setScaleY(scale);
+            tileComponent.getEntity().getViewComponent().addChild(mouseOverTexture);
+        } else tileComponent.getEntity().getViewComponent().removeChild(mouseOverTexture);
+    }
 
     public enum ClickMode {
         BUILDPATH, DESTROY, NONE, BUILD
@@ -47,7 +74,17 @@ public class UIManager {
 
     public void initBuildHouses() {
         ObservableList<Node> children = buildHousePane.getChildren();
-        for (HouseType housetype : HouseType.values()) {
+        Text small=new Text("Small Buildings");
+        small.setStroke(Color.WHITE);
+        children.add(small);
+
+        for (HouseType housetype : new HouseType[]{HouseType.WOODCUTTER, HouseType.FORRESTER, HouseType.ROCKCUTTER}) {
+            children.add(new HouseButton(housetype).button);
+        }
+        Text medium=new Text("Medium Buildings");
+        medium.setStroke(Color.WHITE);
+        children.add(medium);
+        for (HouseType housetype : new HouseType[]{HouseType.SAWMILL, HouseType.STOREHOUSE,}) {
             children.add(new HouseButton(housetype).button);
         }
     }
@@ -82,6 +119,11 @@ public class UIManager {
             }
             button = new Button();
             button.setOnMouseClicked(e -> {
+                if (firstClicked != null) {
+                    firstClicked.getEntity().getViewComponent().setOpacity(1);
+                    firstClicked.getEntity().getViewComponent().getChildren().get(0).blendModeProperty().set(defaultblendmode);
+                    firstClicked = null;
+                }
                 System.out.println(type);
                 clickMode = ClickMode.BUILD;
                 houseToBuild = type;

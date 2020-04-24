@@ -9,6 +9,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.UserAction;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.ScrollEvent;
 
 import java.io.File;
@@ -63,10 +64,13 @@ public class BasicGameApp extends GameApplication {
             System.out.println(zoom);
             FXGL.getGameScene().getViewport().setZoom(zoom);
         });
-        FXGL.getInput().addAction(scrollLeft, KeyCode.LEFT);
-        FXGL.getInput().addAction(scrollDown, KeyCode.DOWN);
-        FXGL.getInput().addAction(scrollUp, KeyCode.UP);
-        FXGL.getInput().addAction(scrollRight, KeyCode.RIGHT);
+        FXGL.getInput().addAction(scrollLeft, KeyCode.A);
+        FXGL.getInput().addAction(scrollDown, KeyCode.S);
+        FXGL.getInput().addAction(scrollUp, KeyCode.W);
+        FXGL.getInput().addAction(scrollRight, KeyCode.D);
+        FXGL.getGameScene().getRoot().addEventHandler(MouseDragEvent.ANY,(e->{
+            System.out.println(e.toString());
+        }));
     }
 
     @Override

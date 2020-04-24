@@ -19,6 +19,8 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 
+import static Settlers.TileComponent.TILEHEIGHT;
+import static Settlers.TileComponent.TILEWIDTH;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.texture;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
@@ -28,11 +30,12 @@ import static Settlers.Types.Hextypes.TILE;
 public class HexFactory implements EntityFactory {
     @Spawns("house")
     public Entity newHouse(SpawnData data) {
+
         return entityBuilder()
                 .from(data)
                 .with((Component) data.get("house"))
+                .view((Line) data.get("path"))
                 .view((Texture) data.get("view"))
-                //   .with(new StoreHouseComponent())
                 .build();
     }
 
@@ -44,6 +47,7 @@ public class HexFactory implements EntityFactory {
                 .with(new WoodCutterComponent())
                 .build();
     }
+
     @Spawns("rockcutter")
     public Entity newRockCutter(SpawnData data) {
         return entityBuilder()

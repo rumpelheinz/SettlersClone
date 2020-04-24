@@ -53,6 +53,8 @@ public class MyLevelLoader {
             int x = 0;
             int y = 0;
 
+            int storeLocationX=0;
+            int storeLocationY=0;
             Map map = new Map(width, height);
             while (data.size() > 0) {
                 Long typeInt = (Long) data.get(0);
@@ -73,6 +75,8 @@ public class MyLevelLoader {
                     tileType = TileType.GRASS;
                     TileComponent tile = map.addTile(x, y, tileType);
                 } else if (typeInt == 8) {//StoreHouse
+                    storeLocationX=x;
+                    storeLocationY=y;
                     tileType = TileType.GRASS;
                     TileComponent tile = map.addTile(x, y, tileType);
                 } else if (typeInt == 50) {//StoreHouse
@@ -95,7 +99,7 @@ public class MyLevelLoader {
             }
 //            SpawnData spawnData=new SpawnData(0,0);
 //            spawn("tileContainer",spawnData);
-
+            new StoreHouseComponent(map.get(storeLocationX,storeLocationY),map.get(storeLocationX+1,storeLocationY+1),true);
             return map;
 //            obj.layers[0].data
 

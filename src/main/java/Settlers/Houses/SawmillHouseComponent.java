@@ -1,8 +1,10 @@
 package Settlers.Houses;
 
 import Settlers.*;
+import Settlers.Types.HouseSize;
 import Settlers.Types.ResourceType;
 import Settlers.Types.TileType;
+import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.texture.Texture;
@@ -13,27 +15,16 @@ import java.util.List;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 public class SawmillHouseComponent extends HouseComponent {
-    private Texture texture;
     private SearchQuery findStoreHouseQuery;
     private long startedWorking;
 
-    public SawmillHouseComponent(TileComponent location, TileComponent flagTile) {
-        this.location=location;
-        location.occupied=true;
-        this.flagTile=flagTile;
-        flagTile.setHouse(this);
-        SpawnData data = new SpawnData(location.getEntity().getX(), location.getEntity().getY());
-        texture = getNewTexture(64,64);
-        texture.setTranslateX(-64/2);
-        texture.setTranslateY(-64/2);
-        data.put("house",this);
-        data.put("view",texture);
-        spawn("house",data);
+    public SawmillHouseComponent(TileComponent location, TileComponent flagTile, boolean instantbuild) {
+        init(location, flagTile, instantbuild);
     }
 
 
-    public static Texture getNewTexture(int width,int height) {
-        Texture texture = FXGL.texture("objects/medieval_doorway.png",width,height);
+    public static Texture getNewTexture(int width, int height) {
+        Texture texture = FXGL.texture("objects/medieval_doorway.png", width, height);
         return texture;
     }
 
@@ -48,10 +39,10 @@ public class SawmillHouseComponent extends HouseComponent {
                 }
 //                TileComponent.clearAllSearches();
 //                compareTile.calculatePath();
-                LinkedList<TileComponent.LengthPair> connectionList = compareTile.connections;
+                LinkedList<LengthPair> connectionList = compareTile.connections;
                 if (connectionList == null) {
                 } else {
-                    for (TileComponent.LengthPair connection : connectionList) {
+                    for (LengthPair connection : connectionList) {
                         if (connection.component instanceof StoreHouseComponent) {
                             return true;
                         }
@@ -84,13 +75,13 @@ public class SawmillHouseComponent extends HouseComponent {
         }
 
         if (working) {
-            if (System.currentTimeMillis() - startedWorking > 5000) {
+            if (System.currentTimeMillis() - startedWorking > 10000) {
                 addResource(new Resource(ResourceType.PLANK));
                 working = false;
             }
         } else {
-            List<Resource>logs=getResourcesFromInventory(ResourceType.LOG);
-            if (logs.size()>0) {
+            List<Resource> logs = getResourcesFromInventory(ResourceType.LOG);
+            if (logs.size() > 0 && finished) {
                 inventoryList.remove(logs.get(0));
                 startedWorking = System.currentTimeMillis();
                 working = true;
@@ -112,16 +103,30 @@ public class SawmillHouseComponent extends HouseComponent {
     }
 
     @Override
-    public int wantResource(Resource resource) {
+    public HouseSize getSize() {
+        return HouseSize.House;
+    }
+
+    @Override
+    String getHouseTypeName() {
+        return "Sawmill";
+    }
+
+    @Override
+    public int wantResourceSub(Resource resource) {
         switch (resource.type) {
             case LOG:
-                if (reservedList.contains(resource) && inventoryList.contains(resource)) {
+                if (reservedList.contains(resource) || inventoryList.contains(resource)) {
                     return 2;
                 }
-                int inventory = getResourcesFromInventory(ResourceType.LOG).size();
-                int reserved = getResourcesFromReserve(ResourceType.LOG).size();
+                int inventory = getResourceCountFromInventory(ResourceType.LOG);
+                int reserved = getResourceCountFromReserve(ResourceType.LOG);
                 int sum = inventory + reserved;
-                return (sum < 6 ? 2 : 0);
+                if (sum < 4) return 2;
+                if (sum < 6)
+                    return 1;
+                return 0;
+//                return (sum < 6 ? 2 : 0);
             case PLANK:
                 return 0;
             case STONE:
@@ -132,7 +137,7 @@ public class SawmillHouseComponent extends HouseComponent {
 
 
     @Override
-    public void addResource(Resource resource) {
+    public void addResourceSub(Resource resource) {
         switch (resource.type) {
             case LOG:
                 inventoryList.add(resource);
@@ -147,10 +152,24 @@ public class SawmillHouseComponent extends HouseComponent {
         }
     }
 
+    @Override
+    public WorkerComponent spawnWorker() {
+        return null;
+    }
 
     @Override
-    public boolean pickUp(Resource resource) {
+    boolean usesWorker() {
+        return false;
+    }
 
+    @Override
+    public Texture getTexture(int size, int height) {
+        return getNewTexture(size, height);
+    }
+
+
+    @Override
+    protected boolean pickUpSub(Resource resource) {
         return inventoryList.remove(resource);
     }
 }

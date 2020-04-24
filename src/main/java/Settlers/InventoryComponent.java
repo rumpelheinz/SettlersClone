@@ -22,12 +22,32 @@ public abstract class InventoryComponent extends Component {
 
 
     public void setReserved(Resource resource, boolean reserved) {
-        if (reserved) {
-            this.reservedList.add(resource);
+        if (reserved&&!inventoryList.contains(resource)) {
+
+            reservedList.add(resource);
         } else {
-            this.reservedList.remove(resource);
+            reservedList.remove(resource);
         }
 
+    }
+    public int getResourceCountFromInventory(ResourceType type) {
+        int ret=0;
+        for (Resource resource : inventoryList) {
+            if (resource.type.equals(type)) {
+                ret++;
+            }
+        }
+        return ret;
+    }
+
+    public int getResourceCountFromReserve(ResourceType type) {
+        int ret=0;
+        for (Resource resource : reservedList) {
+            if (resource.type.equals(type)) {
+                ret++;
+            }
+        }
+        return ret;
     }
 
     public LinkedList<Resource> getResourcesFromInventory(ResourceType type) {

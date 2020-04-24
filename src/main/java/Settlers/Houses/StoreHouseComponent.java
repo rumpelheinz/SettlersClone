@@ -2,6 +2,9 @@ package Settlers.Houses;
 
 import Settlers.Resource;
 import Settlers.TileComponent;
+import Settlers.Types.HouseSize;
+import Settlers.Types.ResourceType;
+import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.texture.Texture;
@@ -9,52 +12,94 @@ import org.w3c.dom.Text;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
-public class StoreHouseComponent extends HouseComponent{
+public class StoreHouseComponent extends HouseComponent {
 
 
-
-    public StoreHouseComponent(TileComponent location, TileComponent flagTile) {
-        this.location=location;
-        location.occupied=true;
-        this.flagTile=flagTile;
-        flagTile.setHouse(this);
-        SpawnData data = new SpawnData(location.getEntity().getX(), location.getEntity().getY());
-        texture = getNewTexture(64,64);
-        texture.setTranslateX(-64/2);
-        texture.setTranslateY(-64/2);
-        data.put("house",this);
-        data.put("view",texture);
-        spawn("house",data);
+    public StoreHouseComponent(TileComponent location, TileComponent flagTile, boolean instantbuild) {
+        init(location, flagTile, instantbuild);
+        if (instantbuild) {
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.PLANK));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+            addResource(new Resource(ResourceType.STONE));
+        }
     }
 
     public static Texture getNewTexture(int width, int height) {
-        Texture texture = FXGL.texture("objects/oldBuilding.png",width,height);
+        Texture texture = FXGL.texture("objects/oldBuilding.png", width, height);
         return texture;
     }
 
     @Override
     public void onAdded() {
+
     }
 
     @Override
-    public int wantResource(Resource resource) {
-        switch ( resource.type){
-            case LOG:   return 1;
-            case PLANK: return 1;
-            case STONE: return 1;
+    public HouseSize getSize() {
+        return HouseSize.House;
+    }
+
+    @Override
+    String getHouseTypeName() {
+        return "Storehouse";
+    }
+
+    @Override
+    public int wantResourceSub(Resource resource) {
+        switch (resource.type) {
+            case LOG:
+                return 1;
+            case PLANK:
+                return 1;
+            case STONE:
+                return 1;
         }
         return 0;
     }
 
     @Override
-    public void addResource(Resource resource) {
+    public void addResourceSub(Resource resource) {
         inventoryList.add(resource);
         resource.setTarget(null);
 //        flagComponent.signalResource(resource);
     }
 
     @Override
-    public boolean pickUp(Resource resource) {
+    public WorkerComponent spawnWorker() {
+        return null;
+    }
+
+    @Override
+    boolean usesWorker() {
+        return false;
+    }
+
+    @Override
+    public Texture getTexture(int size, int height) {
+        return getNewTexture(size, height);
+    }
+
+    @Override
+    public boolean pickUpSub(Resource resource) {
         return inventoryList.remove(resource);
     }
 
