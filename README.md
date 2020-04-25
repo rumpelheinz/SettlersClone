@@ -5,28 +5,28 @@ A fun side project to create a Settlers II clone in Java. Written by myself for 
 ![Screenshot](Screenshot.png)
 
 
-##Gameplay
+## Gameplay
 You start with a storehouse, which has some resources in it. 
 You build houses by selecting a house in the ui, and clicking on a free spot("O" on Mouseover).
 You connect houses by clicking on their flag,  and then clicking on the flag you want to build a road too.
 The carriers(monkeys) will begin to carry resources to the construction site.
 Once a building is finished, a worker will appear at the storehouse, and go to the house. He will then start working.
 
-###Houses
-####Woodcutter
+### Houses
+#### Woodcutter
 Cuts down trees and produces logs.
-####Rockcutter
+#### Rockcutter
 Cuts rocks and produces stone.
-####Forrester
+#### Forrester
 Plants new trees. Trees have to grow before they can be cut down.
 
-####Sawmill
+#### Sawmill
 Takes logs and creates planks.
 
-####Storehouse
+#### Storehouse
 Stores resources produced by workers.
 
-##Controls
+## Controls
 Click a house button, and then click on a free spot on the map to build it. Medium buildings require more space around them to be built.
 
 Click on a tile to select it, and then click on another tile, to build a road. Roads start and end with a flag, but flags con only be built at least two tiles apart from each other.
@@ -41,14 +41,14 @@ WASD to move the camera.
 
 F to toggle fullscreen.
 
-##Bugs:
+## Bugs:
 * Buildings can be placed on Water(easy fix).
 
 * If a resource is lying at the flag of a building, and is then assigned to that building, there is no way to get the resource inside. Such a reassign might happen when a road is destroyed or built. This happens because carriers only carry reources from a to b, and not a to a. The best solution would be to have carriers enter buildings to pickup and drop resources.
 
 * There are a number of issues where the assignment of resources goes wrong. This might lead to workers keeping the resource texture. The current fix is to clear any resource textures with every pickup and dropoff.
 
-##Todo:
+## Todo:
 * Use Java FX scene builder to improve the GUI.
 
 * Allow the game to be resized with the window. This should be easy enough, but I don't know how.
@@ -72,13 +72,13 @@ F to toggle fullscreen.
 * Add more houses. Start with farms and mines.
 
 
-##Code
+## Code
 The code uses the FXGL game engine.
 https://github.com/AlmasB/FXGL
 
 Maven is used to build the project and download the libraries.
 
-##Assets 
+## Assets 
 Worker textures made by Freepik from www.flaticon.com
 https://www.flaticon.com/de/packs/pirates-28
 
