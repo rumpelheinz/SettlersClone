@@ -66,7 +66,21 @@ public class BasicGameApp extends GameApplication {
         FXGL.getGameScene().getRoot().addEventFilter(ScrollEvent.ANY, (ScrollEvent event) -> {
             zoom = Math.max(0.1, zoom + (event.getDeltaY() / 400));
             System.out.println(zoom);
-            FXGL.getGameScene().getViewport().setZoom(zoom);
+            Viewport viewport = getGameScene().getViewport();
+            System.out.println("height " + viewport.getHeight());
+//            getGameScene().get
+            if (zoom > 0) {
+                double x = FXGL.getInput().getMouseXWorld();
+                double y = FXGL.getInput().getMouseYWorld();
+
+//            System.out.println(FXGL.getInput().getMouseXUI());
+//            System.out.println(FXGL.getInput().getMouseYUI());
+                double centerX = viewport.getX() + (viewport.getWidth() / viewport.getZoom() / 2);//+viewport.getWidth()*viewport.getZoom();
+                double centerY = viewport.getY() + (viewport.getHeight() / viewport.getZoom() / 2);
+                viewport.setZoom(zoom);
+                viewport.setX(centerX - (viewport.getWidth() / viewport.getZoom() / 2));//-(viewport.getWidth()/2)*viewport.getZoom());
+                viewport.setY(centerY - (viewport.getHeight() / viewport.getZoom() / 2));//-(viewport.getHeight()/2)*viewport.getZoom());
+            }
         });
         FXGL.getInput().addAction(scrollLeft, KeyCode.A);
         FXGL.getInput().addAction(scrollDown, KeyCode.S);
@@ -100,7 +114,7 @@ public class BasicGameApp extends GameApplication {
         File levelFile = new File(filename);
 //        Level level = null;
         MyLevelLoader loader = new MyLevelLoader();
-        return loader.load(        FXGL.getAssetLoader().getStream(filename));
+        return loader.load(FXGL.getAssetLoader().getStream(filename));
     }
 
     public static void main(String[] args) {
@@ -121,6 +135,7 @@ public class BasicGameApp extends GameApplication {
             FXGL.getSettings().getFullScreen().set(!FXGL.getSettings().getFullScreen().get());
             if (FXGL.getSettings().getFullScreen().get()) {
                 //                FXGL.getSettings().setHeight(1000);
+                Viewport view = getGameScene().getViewport();
             }
 //            FXGL.getGameScene().getViewport().setX(FXGL.getGameScene().getViewport().getX() - 10);
         }
