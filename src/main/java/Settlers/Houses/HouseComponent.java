@@ -8,9 +8,11 @@ import Settlers.TileComponent;
 import Settlers.Types.Direction;
 import Settlers.Types.HouseSize;
 import Settlers.Types.ResourceType;
+import Settlers.UI.UIManager;
 import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.texture.Texture;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
@@ -31,7 +33,7 @@ public abstract class HouseComponent extends InventoryComponent {
     TileComponent location;
     Texture texture;
     WorkerComponent worker;
-    String name;
+    public String name;
 
     public abstract HouseSize getSize();
 
@@ -56,6 +58,9 @@ public abstract class HouseComponent extends InventoryComponent {
                 finish();
             }
         } else addResourceSub(resource);
+        if (UIManager.selectedHouse==this){
+            UIManager.repaintResourcePane();
+        }
         System.out.println(pad(name, 10) + ": Logs " + getResourcesFromInventory(ResourceType.LOG).size() + " in stock, " + getResourcesFromReserve(ResourceType.LOG).size() + " arriving\n" +
 
                 pad(" ", 12) + "Stones " + getResourcesFromInventory(ResourceType.STONE).size() + " in stock, " + getResourcesFromReserve(ResourceType.STONE).size() + " arriving\n" +
@@ -106,6 +111,10 @@ public abstract class HouseComponent extends InventoryComponent {
         }
         name = getHouseTypeName() + houseId;
         houseId++;
+        entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            UIManager.selectedHouse = this;
+            UIManager.repaintResourcePane();
+        });
         flagTile.reCalculatePath();
     }
 
@@ -250,13 +259,17 @@ public abstract class HouseComponent extends InventoryComponent {
         return ret + in;
     }
 
-    public boolean pickUp(Resource resource) {
+    public final boolean pickUp(Resource resource) {
         System.out.println(pad(name, 10) + ": Logs " + getResourcesFromInventory(ResourceType.LOG).size() + " in stock, " + getResourcesFromReserve(ResourceType.LOG).size() + " arriving\n" +
 
                 pad(" ", 12) + "Stones " + getResourcesFromInventory(ResourceType.STONE).size() + " in stock, " + getResourcesFromReserve(ResourceType.STONE).size() + " arriving\n" +
                 pad(" ", 12) + "Planks " + getResourcesFromInventory(ResourceType.PLANK).size() + " in stock, " + getResourcesFromReserve(ResourceType.PLANK).size() + " arriving\n"
         );
-        return pickUpSub(resource);
+        boolean ret = pickUpSub(resource);
+        if (UIManager.selectedHouse==this){
+            UIManager.repaintResourcePane();
+        }
+        return ret;
     }
 
     protected abstract boolean pickUpSub(Resource resource);

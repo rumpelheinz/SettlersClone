@@ -21,13 +21,18 @@ public class Resource {
         if (target != null) {
             target.setReserved(this, false);
         }
-        if (reservedByWorker!=null){
+        if (reservedByWorker != null) {
             reservedByWorker.clearTargetResource();
-            reservedByWorker=null;
+            reservedByWorker = null;
         }
-        target=newTarget;
-        if (newTarget != null) {
-            target.setReserved(this, true);
+
+        if (newTarget == null) {
+            target = null;
+        } else {
+            if (!newTarget.inventoryList.contains(this)) {
+                target = newTarget;
+                target.setReserved(this, true);
+            } else target = null;
         }
     }
 }

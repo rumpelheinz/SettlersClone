@@ -1,6 +1,7 @@
 package Settlers;
 
 import Settlers.Types.ResourceType;
+import Settlers.UI.UIManager;
 import com.almasb.fxgl.entity.component.Component;
 
 import java.util.LinkedList;
@@ -22,16 +23,21 @@ public abstract class InventoryComponent extends Component {
 
 
     public void setReserved(Resource resource, boolean reserved) {
-        if (reserved&&!inventoryList.contains(resource)) {
+        int firstSize = reservedList.size();
+        if (reserved && !inventoryList.contains(resource)) {
 
             reservedList.add(resource);
         } else {
             reservedList.remove(resource);
         }
+        if (firstSize != reservedList.size())
+            UIManager.repaintResourcePane();
+
 
     }
+
     public int getResourceCountFromInventory(ResourceType type) {
-        int ret=0;
+        int ret = 0;
         for (Resource resource : inventoryList) {
             if (resource.type.equals(type)) {
                 ret++;
@@ -41,7 +47,7 @@ public abstract class InventoryComponent extends Component {
     }
 
     public int getResourceCountFromReserve(ResourceType type) {
-        int ret=0;
+        int ret = 0;
         for (Resource resource : reservedList) {
             if (resource.type.equals(type)) {
                 ret++;

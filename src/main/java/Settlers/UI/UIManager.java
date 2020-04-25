@@ -2,13 +2,20 @@ package Settlers.UI;
 
 import Settlers.Houses.*;
 import Settlers.PathComponent;
+import Settlers.Resource;
 import Settlers.TileComponent;
 import Settlers.Types.HouseSize;
 import Settlers.Types.HouseType;
+import Settlers.Types.ResourceType;
+import com.almasb.fxgl.core.View;
 import com.almasb.fxgl.texture.Texture;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
@@ -17,6 +24,7 @@ import javafx.scene.text.Text;
 
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getAppHeight;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
 public class UIManager {
     public static BlendMode defaultblendmode;
@@ -28,6 +36,8 @@ public class UIManager {
     static TileComponent secondClicked;
 
     static Text mouseOverTexture;
+    static TilePane resourcePane;
+    public static HouseComponent selectedHouse;
 
     public static void mouseOverTile(TileComponent tileComponent, boolean entered) {
 
@@ -59,35 +69,113 @@ public class UIManager {
     static public ClickMode clickMode;
 
     public UIManager() {
-        root = new Pane();
+        root = new TilePane();
         root.setMinWidth(400);
         root.setMaxWidth(400);
         root.setMinHeight(getAppHeight());
         root.setMaxHeight(getAppHeight());
         root.setTranslateX(getAppWidth() - 400);
         buildHousePane = new TilePane();
-        buildHousePane.setMaxWidth(root.getWidth());
+        buildHousePane.setMaxWidth(350);
+        buildHousePane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
         initBuildHouses();
-        root.getChildren().add(buildHousePane);
-        root.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
+        ScrollPane pane = new ScrollPane(buildHousePane);
+        pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+        pane.setMinHeight(550);
+        // pane.setBackground(Background.EMPTY);
+        resourcePane = new TilePane();
+
+        resourcePane.setMinWidth(400);
+        resourcePane.setMaxWidth(400);
+        resourcePane.setOrientation(Orientation.VERTICAL);
+//        resourcePane.setMinHeight(1000);
+        resourcePane.setBackground(new Background(new BackgroundFill(Color.BROWN, null, null)));
+        root.getChildren().add(pane);
+        root.getChildren().add(resourcePane);
+        root.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+
+    }
+    static Texture log = texture("log.png", 16, 16);
+    static Texture plank = texture("plank.png", 16, 16);
+    static Texture stone = texture("rock.png", 16, 16);
+    static Texture getResourceTexture(ResourceType type){
+        switch (type){
+            case STONE:
+                return texture("rock.png", 32, 32);
+            case PLANK:
+                return texture("plank.png", 32, 32);
+            case LOG:
+                return texture("log.png", 32, 32);
+
+        }
+        return null;
+    }
+    public static void repaintResourcePane() {
+        resourcePane.getChildren().clear();
+        System.out.println("repaint");
+        if (selectedHouse != null) {
+            resourcePane.getChildren().add(new Text(selectedHouse.name));
+            for (ResourceType type : ResourceType.values()) {
+//                resourcePane.getChildren().add(new Text(type.toString()));
+
+                for (Resource resource : selectedHouse.getResourcesFromInventory(type)) {
+
+                    StackPane child=new StackPane();
+                    child.setPrefWidth(200);
+                    child.setPrefHeight(20);
+                    Texture tex=getResourceTexture(type);
+//                    tex.setTranslateX(-50);
+                    child.getChildren().add(tex);
+                    Text text=new Text( " -> " + ((resource.target == null) ? "" : resource.target.name));
+                    //text.setTranslateX(-0);
+                    child.getChildren().add(text);
+                    child.setAlignment(tex, Pos.TOP_LEFT);
+                    tex.setTranslateX(10);
+                    child.setAlignment(text, Pos.TOP_LEFT);
+                    text.setTranslateX(60);
+                    text.setTranslateY(10);
+                    resourcePane.getChildren().add(child);
+                }
+            }
+            resourcePane.getChildren().add(new Text(selectedHouse.name + " Arriving"));
+            for (ResourceType type : ResourceType.values()) {
+
+                for (Resource resource : selectedHouse.getResourcesFromReserve(type)) {
+                    StackPane child=new StackPane();
+                    child.setPrefWidth(200);
+                    child.setPrefHeight(20);
+                    Texture tex=getResourceTexture(type);
+                    tex.setTranslateX(-100);
+                    child.getChildren().add(tex);
+                    Text text=new Text( " <--- " /*+ ((resource.target == null) ? "" : resource.target.toString())*/);
+                    tex.setTranslateX(-80);
+                    child.getChildren().add(text);
+                    resourcePane.getChildren().add(child);
+                }
+            }
+
+        } else {
+        }
     }
 
     public void initBuildHouses() {
         ObservableList<Node> children = buildHousePane.getChildren();
-        Text small=new Text("Small Buildings");
+        Text small = new Text("Small Buildings");
+        small.setFill(Color.TRANSPARENT);//new Background(new BackgroundFill(Color.TRANSPARENT,null,null))
         small.setStroke(Color.WHITE);
         children.add(small);
 
         for (HouseType housetype : new HouseType[]{HouseType.WOODCUTTER, HouseType.FORRESTER, HouseType.ROCKCUTTER}) {
             children.add(new HouseButton(housetype).button);
         }
-        Text medium=new Text("Medium Buildings");
+        Text medium = new Text("Medium Buildings");
         medium.setStroke(Color.WHITE);
         children.add(medium);
         for (HouseType housetype : new HouseType[]{HouseType.SAWMILL, HouseType.STOREHOUSE,}) {
             children.add(new HouseButton(housetype).button);
         }
     }
+
 
     private class HouseButton {
         Button button;
@@ -130,6 +218,7 @@ public class UIManager {
             });
             button.setGraphic(texture);
             button.setText(type.toString());
+            button.setId("Button");
         }
 
     }

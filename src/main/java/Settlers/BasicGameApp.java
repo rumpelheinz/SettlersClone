@@ -8,6 +8,7 @@ import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.UserAction;
+import com.almasb.fxgl.scene.CSS;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.ScrollEvent;
@@ -28,9 +29,12 @@ public class BasicGameApp extends GameApplication {
     protected void initSettings(GameSettings settings) {
         settings.setWidth(1400);
         settings.setHeight(1000);
+        settings.setManualResizeEnabled(true);
 //        settings.setFullScreenFromStart(true);
-//        settings.setFullScreenAllowed(true);
+        settings.setFullScreenAllowed(true);
         settings.setTitle("Basic Game App");
+        settings.getCSSList().add("myStyle.css");
+
     }
 
 
@@ -67,8 +71,9 @@ public class BasicGameApp extends GameApplication {
         FXGL.getInput().addAction(scrollLeft, KeyCode.A);
         FXGL.getInput().addAction(scrollDown, KeyCode.S);
         FXGL.getInput().addAction(scrollUp, KeyCode.W);
+        FXGL.getInput().addAction(toggleFullScreen, KeyCode.F);
         FXGL.getInput().addAction(scrollRight, KeyCode.D);
-        FXGL.getGameScene().getRoot().addEventHandler(MouseDragEvent.ANY,(e->{
+        FXGL.getGameScene().getRoot().addEventHandler(MouseDragEvent.ANY, (e -> {
             System.out.println(e.toString());
         }));
     }
@@ -78,7 +83,7 @@ public class BasicGameApp extends GameApplication {
         FXGL.getGameWorld().addEntityFactory(new HexFactory());
 //        FXGL.getPrimaryStage().setX(-1920);
 //        FXGL.getPrimaryStage().setY(0);
-        map = loadLevel("target/classes/assets/json/map3.json");
+        map = loadLevel("/assets/json/map3.json");
 //        map=  loadLevel("assets/json/mapnone.json");
         Viewport viewport = FXGL.getGameScene().getViewport();
 
@@ -91,10 +96,11 @@ public class BasicGameApp extends GameApplication {
     }
 
     private Map loadLevel(String filename) {
+//        FXGL.getAssetLoader().loadText(filename);
         File levelFile = new File(filename);
 //        Level level = null;
         MyLevelLoader loader = new MyLevelLoader();
-        return loader.load(levelFile);
+        return loader.load(        FXGL.getAssetLoader().getStream(filename));
     }
 
     public static void main(String[] args) {
@@ -108,6 +114,26 @@ public class BasicGameApp extends GameApplication {
 //        System.out.println((System.currentTimeMillis()%100000));
 //        viewport.setX((System.currentTimeMillis()%100000)/(1000.0/110)%(30*110- getSettings().getWidth()));
     }
+
+    UserAction toggleFullScreen = new UserAction("toggleFullScreen") {
+        @Override
+        protected void onActionBegin() {
+            FXGL.getSettings().getFullScreen().set(!FXGL.getSettings().getFullScreen().get());
+            if (FXGL.getSettings().getFullScreen().get()) {
+                //                FXGL.getSettings().setHeight(1000);
+            }
+//            FXGL.getGameScene().getViewport().setX(FXGL.getGameScene().getViewport().getX() - 10);
+        }
+
+        @Override
+        protected void onAction() {
+        }
+
+        @Override
+        protected void onActionEnd() {
+            // action finished (key is released), play hitting animation based on swing power
+        }
+    };
 
     UserAction scrollLeft = new UserAction("scrollLeft") {
         @Override

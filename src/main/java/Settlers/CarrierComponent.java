@@ -37,7 +37,7 @@ public class CarrierComponent extends Component {
             Point2D bLoc = currTargetLoc;
             Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
             dir = dir.mul(speed);                        //
-            if ((dir.length()+0.1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
+            if ((dir.length() + 0.1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
                 currentPosition2D = currTargetLoc;
                 entity.setPosition(currTargetLoc);
                 currentIndex = curTargetIndex;
@@ -220,8 +220,11 @@ public class CarrierComponent extends Component {
 
                     if (targetIndex == currentIndex) {
                         dropOffTile.addResource(resource);
-                        setResourceTexture(resource, false);
                         getEntity().getViewComponent().removeChild(log);
+                        getEntity().getViewComponent().removeChild(stone);
+                        getEntity().getViewComponent().removeChild(plank);
+                        setResourceTexture(resource, false);
+//                        getEntity().getViewComponent().removeChild(resourceTexture);
                         currentTaskType = TaskType.IDLE;
                         hasResource = false;
                         resource = null;
@@ -257,11 +260,16 @@ public class CarrierComponent extends Component {
     }
 
     public void clearTargetResource() {
-//        System.out.println("cleartargetresource");
+        System.out.println("cleartargetresource");
         currentPosition2D = pathPoints2D[currentIndex];
-        boolean hasResource = false;
-        Resource resource = null;
-        TileComponent dropOffTile = null;
+        entity.getViewComponent().getChildren().remove(log);
+        entity.getViewComponent().getChildren().remove(stone);
+        entity.getViewComponent().getChildren().remove(plank);
+
+
+        hasResource = false;
+        resource = null;
+        dropOffTile = null;
         targetIndex = pathPoints2D.length / 2;
         currentTaskType = TaskType.IDLE;
     }
@@ -309,23 +317,28 @@ public class CarrierComponent extends Component {
 
     }
 
+    Texture resourceTexture;
+
     private void setResourceTexture(Resource resource, boolean visible) {
-        Texture tex = null;
+        getEntity().getViewComponent().removeChild(log);
+        getEntity().getViewComponent().removeChild(plank);
+        getEntity().getViewComponent().removeChild(stone);
+        resourceTexture = null;
         switch (resource.type) {
             case LOG:
-                tex = log;
+                resourceTexture = log;
                 break;
             case PLANK:
-                tex = plank;
+                resourceTexture = plank;
                 break;
             case STONE:
-                tex = stone;
+                resourceTexture = stone;
                 break;
         }
         if (visible) {
-            this.getEntity().getViewComponent().addChild(tex);
+            this.getEntity().getViewComponent().addChild(resourceTexture);
         } else {
-            this.getEntity().getViewComponent().removeChild(tex);
+            this.getEntity().getViewComponent().removeChild(resourceTexture);
         }
     }
 

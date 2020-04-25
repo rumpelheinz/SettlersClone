@@ -15,13 +15,13 @@ import org.json.simple.parser.ParseException;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 public class MyLevelLoader {
-    public Map load(File file) {
+    public Map load(InputStream file) {
         InputStream is = null;
         String in = "";
         try {
-            is = new FileInputStream(file);
+//            is = new FileInputStream(file);
 
-            BufferedReader buf = new BufferedReader(new InputStreamReader(is));
+            BufferedReader buf = new BufferedReader(new InputStreamReader(file));
 
             String line = null;
             line = buf.readLine();
