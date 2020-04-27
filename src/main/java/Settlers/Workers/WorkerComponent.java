@@ -9,8 +9,10 @@ import Settlers.Types.TileType;
 import Settlers.Types.WorkerType;
 import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxgl.texture.AnimatedTexture;
 import com.almasb.fxgl.texture.Texture;
 import javafx.geometry.Point2D;
+import javafx.util.Duration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -277,10 +279,11 @@ public abstract class WorkerComponent extends Component {
                             startWaiting(5000);
                         }
                     }
-                    if (getWorkerType()==WorkerType.BUILDER){
+                    if (getWorkerType() == WorkerType.BUILDER) {
                         texture.setVisible(true);
-                        inside=false;
-                        currentTaskType=TaskType.BUILDING;
+                        entity.getViewComponent().addChild(getWorkAnimation());
+                        inside = false;
+                        currentTaskType = TaskType.BUILDING;
                     }
                     break;
                 case RETURNING:
@@ -312,11 +315,15 @@ public abstract class WorkerComponent extends Component {
 
                     break;
                 case BUILDING:
-                    if (house.finished){
+                    if (house.finished) {
                         entity.removeFromWorld();
                     }
-                    if (house.build()){
-
+                    if (house.build()) {
+                        getWorkAnimation().setVisible(true);
+                        getWorkAnimation().play().setOnCycleFinished(() -> getWorkAnimation().setVisible(false));
+                    } else {
+                        getWorkAnimation().stop();
+                        getWorkAnimation().setVisible(false);
                     }
                     startWaiting(5000);
                     break;
@@ -324,6 +331,21 @@ public abstract class WorkerComponent extends Component {
         }
 
     }
+
+    AnimatedTexture getWorkAnimation() {
+        if (workAnimation == null) {
+            workAnimation = texture("hammer.png").toAnimatedTexture(4, Duration.seconds(0.5));
+            workAnimation.setScaleX(3);
+            workAnimation.setScaleY(3);
+            workAnimation.setTranslateY(-5);
+            workAnimation.setTranslateX(20);
+            return workAnimation;
+        } else return workAnimation;
+
+//        return texture("hammer.png").toAnimatedTexture(4, Duration.seconds(0.5));
+    }
+
+    AnimatedTexture workAnimation;
 
     protected abstract ResourceType createsResource();
 

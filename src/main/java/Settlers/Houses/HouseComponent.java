@@ -13,6 +13,7 @@ import Settlers.Workers.HouseBuilderComponent;
 import Settlers.Workers.WoodCutterComponent;
 import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.entity.SpawnData;
+import com.almasb.fxgl.texture.AnimatedTexture;
 import com.almasb.fxgl.texture.Texture;
 import com.almasb.fxgl.ui.ProgressBar;
 import javafx.scene.input.MouseEvent;
