@@ -4,6 +4,7 @@ import Settlers.*;
 import Settlers.Types.ResourceType;
 import Settlers.Types.TaskType;
 import Settlers.Types.TileType;
+import Settlers.Types.WorkerType;
 import com.almasb.fxgl.texture.Texture;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
@@ -18,6 +19,11 @@ public class WoodCutterComponent extends WorkerComponent {
     @Override
     String getTextureString() {
         return "pirates/024-crab.png";
+    }
+
+    @Override
+    public WorkerType getWorkerType() {
+        return WorkerType.GATHERER;
     }
 
     @Override

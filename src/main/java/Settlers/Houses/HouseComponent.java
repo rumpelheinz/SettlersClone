@@ -9,9 +9,12 @@ import Settlers.Types.Direction;
 import Settlers.Types.HouseSize;
 import Settlers.Types.ResourceType;
 import Settlers.UI.UIManager;
+import Settlers.Workers.HouseBuilderComponent;
+import Settlers.Workers.WoodCutterComponent;
 import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.texture.Texture;
+import com.almasb.fxgl.ui.ProgressBar;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -33,6 +36,7 @@ public abstract class HouseComponent extends InventoryComponent {
     TileComponent location;
     Texture texture;
     WorkerComponent worker;
+    HouseBuilderComponent builder;
     public String name;
 
     public abstract HouseSize getSize();
@@ -41,24 +45,25 @@ public abstract class HouseComponent extends InventoryComponent {
 
     abstract String getHouseTypeName();
 
+    ProgressBar progressBar;
+
     public void addResource(Resource resource) {
 
         if (!finished) {
-            resource.setTarget(this);
+//            resource.setTarget(this);
+            inventoryList.add(resource);
+            reservedList.remove(resource);
             List<ResourceType> required = new ArrayList<>(Arrays.asList(requiredResource()));
             int count = required.size();
-            for (Resource tmpResource : reservedList) {
-                required.remove(tmpResource.type);
-            }
             for (Resource tmpResource : inventoryList) {
                 required.remove(tmpResource.type);
             }
-            System.out.println(required.size() / (1.0 * count));
-            if (required.size() == 0) {
-                finish();
-            }
+            System.out.println(100 - (required.size() / (1.0 * count) * 100));
+            if (required.size() == 0)
+                progressBar.setFill(Color.GREEN);
         } else addResourceSub(resource);
-        if (UIManager.selectedHouse==this){
+
+        if (UIManager.selectedHouse == this) {
             UIManager.repaintResourcePane();
         }
         System.out.println(pad(name, 10) + ": Logs " + getResourcesFromInventory(ResourceType.LOG).size() + " in stock, " + getResourcesFromReserve(ResourceType.LOG).size() + " arriving\n" +
@@ -72,7 +77,7 @@ public abstract class HouseComponent extends InventoryComponent {
 
     abstract boolean usesWorker();
 
-    boolean finished;
+    public boolean finished;
 
     void init(TileComponent location, TileComponent flagTile, boolean instantBuild) {
         SpawnData data = new SpawnData(location.getEntity().getX(), location.getEntity().getY());
@@ -109,6 +114,14 @@ public abstract class HouseComponent extends InventoryComponent {
                 tile.occupied = true;
             }
         }
+        if (!finished) {
+            progressBar = new ProgressBar();
+            progressBar.setWidth(64);
+            progressBar.setFill(Color.RED);
+            progressBar.setTranslateX(-64 / 2);
+            progressBar.setTranslateY(-64);
+            entity.getViewComponent().addChild(progressBar);
+        }
         name = getHouseTypeName() + houseId;
         houseId++;
         entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
@@ -138,10 +151,30 @@ public abstract class HouseComponent extends InventoryComponent {
             }
     }
 
+    public void createBuilderAtWarehouse() {
+        if (!waiting())
+            if (builder == null && !finished) {
+                for (LengthPair lengthPair : flagTile.connections) {
+                    if (lengthPair.component instanceof StoreHouseComponent) {
+                        StoreHouseComponent storeHouse = (StoreHouseComponent) lengthPair.component;
+                        HouseBuilderComponent worker2 = spawn("builder", location.getEntity().getX(), location.getEntity().getY()).getComponent(HouseBuilderComponent.class);
+                        worker2.setCurrentTile(location);
+                        worker2.homeTile = location;
+                        worker2.house = this;
+                        worker2.spawnAtWareHouse(storeHouse);
+                        this.builder = worker2;
+                        return;
+                    }
+                }
+                startWaiting(5000);
+            }
+    }
+
 
     @Override
     public void onUpdate(double tpf) {
         createWorkerAtWarehouse();
+        createBuilderAtWarehouse();
     }
 
     public void reCalculateStock() {
@@ -157,6 +190,7 @@ public abstract class HouseComponent extends InventoryComponent {
     void finish() {
         finished = true;
         entity.getViewComponent().removeChild(texture);
+
         if (getSize() == HouseSize.HUT) {
             texture = getTexture(64, 64);
             texture.setTranslateX(-64 / 2);
@@ -174,6 +208,7 @@ public abstract class HouseComponent extends InventoryComponent {
             Resource a = inventoryList.remove();
             a.setTarget(null);
         }
+        entity.getViewComponent().removeChild(progressBar);
         entity.getViewComponent().addChild(texture);
     }
 
@@ -266,7 +301,7 @@ public abstract class HouseComponent extends InventoryComponent {
                 pad(" ", 12) + "Planks " + getResourcesFromInventory(ResourceType.PLANK).size() + " in stock, " + getResourcesFromReserve(ResourceType.PLANK).size() + " arriving\n"
         );
         boolean ret = pickUpSub(resource);
-        if (UIManager.selectedHouse==this){
+        if (UIManager.selectedHouse == this) {
             UIManager.repaintResourcePane();
         }
         return ret;
@@ -279,5 +314,27 @@ public abstract class HouseComponent extends InventoryComponent {
 
     void startWaiting(int duration) {
         waitUntil = System.currentTimeMillis() + duration;
+    }
+
+    private int buildProgress;
+
+    public boolean build() {
+        List<ResourceType> required = new ArrayList<>(Arrays.asList(requiredResource()));
+        int count = required.size();
+        for (Resource tmpResource : inventoryList) {
+            required.remove(tmpResource.type);
+        }
+        int maxPercent = (int) Math.round(100 - (required.size() / (1.0 * count) * 100));
+        if (buildProgress < maxPercent) {
+            if (getSize() == HouseSize.HUT)
+                buildProgress += 5;
+            else buildProgress += 3;
+            progressBar.currentValueProperty().set(buildProgress);
+            if (buildProgress >= 100) {
+                finish();
+            }
+            return true;
+        }
+        return false;
     }
 }

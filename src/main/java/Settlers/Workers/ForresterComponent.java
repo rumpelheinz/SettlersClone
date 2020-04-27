@@ -6,6 +6,7 @@ import Settlers.Houses.ForresterHouseComponent;
 import Settlers.Types.ResourceType;
 import Settlers.Types.TaskType;
 import Settlers.Types.TileType;
+import Settlers.Types.WorkerType;
 import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.texture.Texture;
@@ -37,6 +38,11 @@ public class ForresterComponent extends WorkerComponent {
     @Override
     String getTextureString() {
         return "pirates/020-kraken.png";
+    }
+
+    @Override
+    public WorkerType getWorkerType() {
+        return WorkerType.GATHERER;
     }
 
 

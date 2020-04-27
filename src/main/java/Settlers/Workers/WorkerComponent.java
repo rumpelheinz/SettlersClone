@@ -6,6 +6,7 @@ import Settlers.Houses.StoreHouseComponent;
 import Settlers.Types.ResourceType;
 import Settlers.Types.TaskType;
 import Settlers.Types.TileType;
+import Settlers.Types.WorkerType;
 import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.texture.Texture;
@@ -37,6 +38,8 @@ public abstract class WorkerComponent extends Component {
 
 
     abstract String getTextureString();
+
+    public abstract WorkerType getWorkerType();
 
     @Override
     public void onAdded() {
@@ -87,8 +90,8 @@ public abstract class WorkerComponent extends Component {
             targetPathIndex = 0;
         }
         for (TileComponent tile : tmpTileList) {
-            if (i==targetPathIndex)
-                targetPathTile=tile;
+            if (i == targetPathIndex)
+                targetPathTile = tile;
             pathPoints2D[i] = tile.getEntity().getPosition();
             i++;
         }
@@ -96,6 +99,7 @@ public abstract class WorkerComponent extends Component {
     }
 
     TileComponent targetPathTile;
+
     void moveAlongPath(double tpf) {
         if (targetPathIndex == currentPathIndex) {
             return;
@@ -231,8 +235,8 @@ public abstract class WorkerComponent extends Component {
             switch (currentTaskType) {
                 case MOVINGTOBUILDING: {
                     moveAlongPath(tpf);
-                    if (currentPathIndex==targetPathIndex){
-                        currentTile=targetPathTile;
+                    if (currentPathIndex == targetPathIndex) {
+                        currentTile = targetPathTile;
                     }
                     if (currentTile == house.flagTile) {
                         setCurrentTile(homeTile);
@@ -262,14 +266,21 @@ public abstract class WorkerComponent extends Component {
 
                     break;
                 case IDLE:
-                    if (findPath(findResourceQuery)) {
-                        if (inside) {
-                            texture.setVisible(true);
+                    if (getWorkerType() == WorkerType.GATHERER) {
+                        if (findPath(findResourceQuery)) {
+                            if (inside) {
+                                texture.setVisible(true);
+                            }
+                            inside = false;
+                            currentTaskType = TaskType.GATHERING;
+                        } else {
+                            startWaiting(5000);
                         }
-                        inside = false;
-                        currentTaskType = TaskType.GATHERING;
-                    } else {
-                        startWaiting(5000);
+                    }
+                    if (getWorkerType()==WorkerType.BUILDER){
+                        texture.setVisible(true);
+                        inside=false;
+                        currentTaskType=TaskType.BUILDING;
                     }
                     break;
                 case RETURNING:
@@ -299,6 +310,15 @@ public abstract class WorkerComponent extends Component {
                         startWaiting(5000);
                     }
 
+                    break;
+                case BUILDING:
+                    if (house.finished){
+                        entity.removeFromWorld();
+                    }
+                    if (house.build()){
+
+                    }
+                    startWaiting(5000);
                     break;
             }
         }

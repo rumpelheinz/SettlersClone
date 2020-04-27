@@ -68,6 +68,7 @@ public class SawmillHouseComponent extends HouseComponent {
 
     @Override
     public void onUpdate(double tpf) {
+        super.onUpdate(tpf);
 
         if (storeHousePath == null && !hasSearchedPath) {
             buildStoreHousePath();

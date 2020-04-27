@@ -77,6 +77,11 @@ public class StoreHouseComponent extends HouseComponent {
     }
 
     @Override
+    public void onUpdate(double tpf) {
+        super.onUpdate(tpf);
+    }
+
+    @Override
     public void addResourceSub(Resource resource) {
         inventoryList.add(resource);
         resource.setTarget(null);

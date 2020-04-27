@@ -3,6 +3,7 @@ package Settlers;
 import Settlers.Types.Hextypes;
 import Settlers.Types.TileType;
 import Settlers.Workers.ForresterComponent;
+import Settlers.Workers.HouseBuilderComponent;
 import Settlers.Workers.RockCutter;
 import Settlers.Workers.WoodCutterComponent;
 import com.almasb.fxgl.entity.Entity;
@@ -73,6 +74,14 @@ public class HexFactory implements EntityFactory {
                 .type(Hextypes.CARRIER)
                 .from(data)
                 .with(new CarrierComponent())
+                .build();
+    }
+    @Spawns("builder")
+    public Entity newBuilder(SpawnData data) {
+        return entityBuilder()
+                .type(Hextypes.WORKER)
+                .from(data)
+                .with(new HouseBuilderComponent())
                 .build();
     }
 
