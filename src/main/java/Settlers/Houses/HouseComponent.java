@@ -1,10 +1,7 @@
 package Settlers.Houses;
 
 
-import Settlers.InventoryComponent;
-import Settlers.LengthPair;
-import Settlers.Resource;
-import Settlers.TileComponent;
+import Settlers.*;
 import Settlers.Types.Direction;
 import Settlers.Types.HouseSize;
 import Settlers.Types.ResourceType;
@@ -167,6 +164,7 @@ public abstract class HouseComponent extends InventoryComponent {
                         return;
                     }
                 }
+                System.out.println(name+" Waiting");
                 startWaiting(5000);
             }
     }
@@ -314,7 +312,12 @@ public abstract class HouseComponent extends InventoryComponent {
     public abstract void addResourceSub(Resource resource);
 
     void startWaiting(int duration) {
-        waitUntil = System.currentTimeMillis() + duration;
+        System.out.println(duration);
+        System.out.println(System.currentTimeMillis());
+        waitUntil = (System.currentTimeMillis() + ((long)(duration/ BasicGameApp.gameSpeed.val)));
+        System.out.println(waitUntil);
+        System.out.println(System.currentTimeMillis()-waitUntil);
+        System.out.println("");
     }
 
     private int buildProgress;

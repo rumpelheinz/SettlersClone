@@ -1,6 +1,7 @@
 package Settlers;
 
 import Settlers.Houses.HouseComponent;
+import Settlers.Types.GameSpeed;
 import Settlers.Types.TaskType;
 import com.almasb.fxgl.core.math.Vec2;
 import com.almasb.fxgl.entity.component.Component;
@@ -36,7 +37,7 @@ public class CarrierComponent extends Component {
             Point2D aLoc = pathPoints2D[(currentIndex)];
             Point2D bLoc = currTargetLoc;
             Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
-            dir = dir.mul(speed);                        //
+            dir = dir.mul(speed* BasicGameApp.gameSpeed.val);                        //
             if ((dir.length() + 0.1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
                 currentPosition2D = currTargetLoc;
                 entity.setPosition(currTargetLoc);

@@ -1,5 +1,6 @@
 package Settlers;
 
+import Settlers.Types.GameSpeed;
 import Settlers.UI.UIManager;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
@@ -21,9 +22,10 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 public class BasicGameApp extends GameApplication {
     public static int stepsBetweenRedraw = 0;
-    private Entity player;
     static Random random = new Random();
     static protected Map map;
+
+    public static GameSpeed gameSpeed=GameSpeed.FAST;
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -111,7 +113,7 @@ public class BasicGameApp extends GameApplication {
 
     private Map loadLevel(String filename) {
 //        FXGL.getAssetLoader().loadText(filename);
-        File levelFile = new File(filename);
+//        File levelFile = new File(filename);
 //        Level level = null;
         MyLevelLoader loader = new MyLevelLoader();
         return loader.load(FXGL.getAssetLoader().getStream(filename));

@@ -83,8 +83,9 @@ public class UIManager {
         pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
         pane.setMinHeight(550);
         // pane.setBackground(Background.EMPTY);
-        resourcePane = new TilePane();
+//        root.getChildren().add(new GUITest().init());
 
+        resourcePane = new TilePane();
         resourcePane.setMinWidth(400);
         resourcePane.setMaxWidth(400);
         resourcePane.setOrientation(Orientation.VERTICAL);
@@ -93,7 +94,7 @@ public class UIManager {
         root.getChildren().add(pane);
         root.getChildren().add(resourcePane);
         root.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
-
+        root.applyCss();
     }
     static Texture log = texture("log.png", 16, 16);
     static Texture plank = texture("plank.png", 16, 16);

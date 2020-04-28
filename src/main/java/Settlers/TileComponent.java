@@ -1,10 +1,7 @@
 package Settlers;
 
 import Settlers.Houses.*;
-import Settlers.Types.Direction;
-import Settlers.Types.HouseSize;
-import Settlers.Types.HouseType;
-import Settlers.Types.TileType;
+import Settlers.Types.*;
 import Settlers.UI.UIManager;
 import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.dsl.FXGL;
@@ -22,6 +19,7 @@ import java.util.LinkedList;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
 public class TileComponent extends InventoryComponent {
+    private static Player owner = Player.NONE ;
     public final TileType type;
     public boolean occupied = false;
     protected int x;
@@ -484,7 +482,7 @@ public class TileComponent extends InventoryComponent {
     }
 
     public boolean canBuildHouse(HouseSize size) {
-        if (flag || occupied || pathPassingThrough != null || (hasResourceComponent())) {
+        if (flag || occupied ||type==TileType.WATER|| pathPassingThrough != null || (hasResourceComponent())) {
             return false;
         }
         if (getNeighbour(Direction.SE) == null || ((!getNeighbour(Direction.SE).flag) && (!getNeighbour(Direction.SE).canBuildFlag())))
@@ -523,6 +521,12 @@ public class TileComponent extends InventoryComponent {
         return true;
     }
 
+//
+//    public boolean hasBorder(Direction dir){
+//        if (getNeighbour(dir)==null||getNeighbour(dir).owner!=Player.PLAYER.PLAYER){
+//            return
+//        }
+//    }
 
     public void buildHouse(HouseType type, boolean instant) {
         System.out.println("Building " + type.toString());

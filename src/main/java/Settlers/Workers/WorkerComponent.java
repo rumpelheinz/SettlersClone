@@ -61,7 +61,8 @@ public abstract class WorkerComponent extends Component {
 
     public void spawnAtWareHouse(StoreHouseComponent storeHouse) {
         setCurrentTile(storeHouse.flagTile);
-        house.setWorker(this);
+        if (getWorkerType() == WorkerType.GATHERER || getWorkerType() == WorkerType.MANUFACTURER)
+            house.setWorker(this);
         texture.setVisible(true);
         currentTaskType = TaskType.MOVINGTOBUILDING;
         setNextPath();
@@ -113,7 +114,7 @@ public abstract class WorkerComponent extends Component {
             Point2D aLoc = pathPoints2D[(currentPathIndex)];
             Point2D bLoc = currTargetLoc;
             Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
-            dir = dir.mul(speed);                        //
+            dir = dir.mul(speed * BasicGameApp.gameSpeed.val);                        //
             if ((dir.length() + 0.1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
                 currentPosition2D = currTargetLoc;
                 entity.setPosition(currTargetLoc);
@@ -137,7 +138,7 @@ public abstract class WorkerComponent extends Component {
             Point2D b = curtarget.getEntity().getPosition();
             Vec2 dir = new Vec2(b.getX() - a.getX(), b.getY() - a.getY());
             // System.out.println(dir.toString());
-            dir = dir.mul(speed);
+            dir = dir.mul(speed * BasicGameApp.gameSpeed.val);                        //
             if (dir.length() >= new Vec2(currentPosition2D.subtract(b)).length()) {
                 currentPosition2D = curtarget.getEntity().getPosition();
                 entity.setPosition(currentPosition2D);
@@ -357,7 +358,7 @@ public abstract class WorkerComponent extends Component {
 
 
     void startWaiting(int duration) {
-        waitUntil = System.currentTimeMillis() + duration;
+        waitUntil = (long) (System.currentTimeMillis() + (duration / BasicGameApp.gameSpeed.val));
     }
 
 

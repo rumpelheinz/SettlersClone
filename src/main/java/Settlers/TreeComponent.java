@@ -40,7 +40,7 @@ public class TreeComponent extends Component {
     @Override
     public void onUpdate(double tpf) {
         if (!ripe){
-            double scale=interpolate(start,start+60*1000,System.currentTimeMillis());
+            double scale=interpolate(start,start+(60*1000/BasicGameApp.gameSpeed.val),System.currentTimeMillis());
             texture.setScaleX(scale);
             texture.setScaleY(scale);
             entity.getViewComponent().onUpdate(tpf);
