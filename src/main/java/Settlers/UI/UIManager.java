@@ -1,26 +1,31 @@
 package Settlers.UI;
 
+import Settlers.BasicGameApp;
 import Settlers.Houses.*;
 import Settlers.PathComponent;
 import Settlers.Resource;
 import Settlers.TileComponent;
+import Settlers.Types.GameSpeed;
 import Settlers.Types.HouseSize;
 import Settlers.Types.HouseType;
 import Settlers.Types.ResourceType;
-import com.almasb.fxgl.core.View;
 import com.almasb.fxgl.texture.Texture;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+
 
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getAppHeight;
@@ -29,8 +34,8 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 public class UIManager {
     public static BlendMode defaultblendmode;
     private static HouseType houseToBuild;
-    public Pane root;
-    TilePane buildHousePane;
+    public VBox root;
+    VBox buildHousePane;
 
     static TileComponent firstClicked;
     static TileComponent secondClicked;
@@ -69,38 +74,83 @@ public class UIManager {
     static public ClickMode clickMode;
 
     public UIManager() {
-        root = new TilePane();
+        root = new VBox();
         root.setMinWidth(400);
         root.setMaxWidth(400);
         root.setMinHeight(getAppHeight());
         root.setMaxHeight(getAppHeight());
         root.setTranslateX(getAppWidth() - 400);
-        buildHousePane = new TilePane();
+//        ButtonBar buttonBar = new ButtonBar();
+//        buttonBar.setPrefWidth(400);
+//        buttonBar.getButtons().add(new Text("Game Speed"));
+////        buttonBar.setPrefHeight(100);
+////        buttonBar.setMaxHeight(100);
+//
+//        TilePane SpeedPane = new TilePane();
+////        SpeedPane.setMinWidth(400);
+////        SpeedPane.setMaxWidth(400);
+////        SpeedPane.setMinHeight(50);
+////        SpeedPane.setMaxHeight(50);
+//        SpeedPane.setBackground(new Background(new BackgroundFill(Color.DARKRED, null, null)));
+//        kotlin.Pair<GameSpeed, String>[] speedPairs = new kotlin.Pair[]{new kotlin.Pair<GameSpeed, String>(GameSpeed.NORMAL, "Normal"), new kotlin.Pair<GameSpeed, String>(GameSpeed.FAST, "3x"), new kotlin.Pair<GameSpeed, String>(GameSpeed.VERY_FAST, "5x")};
+//        for (kotlin.Pair<GameSpeed, String> val : speedPairs) {
+//            Button but = new Button(val.component2());
+//            but.setOnMouseClicked((e) -> {
+//                BasicGameApp.gameSpeed = val.component1();
+//            });
+//            buttonBar.getButtons().add(but);
+//        }
+//
+//        SpeedPane.getChildren().add(buttonBar);
+
+        HBox SpeedPane = new HBox();
+        Text speedLabel = new Text("Game Speed");
+        SpeedPane.getChildren().add(speedLabel);
+
+        Slider speedSlider = new Slider(BasicGameApp.gameSpeed.val, 1, 5);
+        speedSlider.setMin(1);
+        speedSlider.setMax(5);
+        speedSlider.setMajorTickUnit(1);
+//        speedSlider.setShowTickMarks(true);
+        speedSlider.setShowTickLabels(true);
+        speedSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue<? extends Number> ov,
+                                Number old_val, Number new_val) {
+                BasicGameApp.gameSpeed = new GameSpeed(new_val.intValue());
+            }
+        });
+        SpeedPane.getChildren().add(speedSlider);
+
+        root.getChildren().add(SpeedPane);
+
+        buildHousePane = new VBox();
         buildHousePane.setMaxWidth(350);
         buildHousePane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
         initBuildHouses();
-        ScrollPane pane = new ScrollPane(buildHousePane);
-        pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
-        pane.setMinHeight(550);
-        // pane.setBackground(Background.EMPTY);
+        ScrollPane scrollPane = new ScrollPane(buildHousePane);
+        scrollPane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+//        scrollPane.setMinHeight(550);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setBackground(Background.EMPTY);
 //        root.getChildren().add(new GUITest().init());
-
         resourcePane = new TilePane();
         resourcePane.setMinWidth(400);
         resourcePane.setMaxWidth(400);
         resourcePane.setOrientation(Orientation.VERTICAL);
 //        resourcePane.setMinHeight(1000);
         resourcePane.setBackground(new Background(new BackgroundFill(Color.BROWN, null, null)));
-        root.getChildren().add(pane);
+        root.getChildren().add(scrollPane);
         root.getChildren().add(resourcePane);
         root.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
-        root.applyCss();
+//        root.applyCss();
     }
+
     static Texture log = texture("log.png", 16, 16);
     static Texture plank = texture("plank.png", 16, 16);
     static Texture stone = texture("rock.png", 16, 16);
-    static Texture getResourceTexture(ResourceType type){
-        switch (type){
+
+    static Texture getResourceTexture(ResourceType type) {
+        switch (type) {
             case STONE:
                 return texture("rock.png", 32, 32);
             case PLANK:
@@ -111,6 +161,7 @@ public class UIManager {
         }
         return null;
     }
+
     public static void repaintResourcePane() {
         resourcePane.getChildren().clear();
         System.out.println("repaint");
@@ -121,13 +172,14 @@ public class UIManager {
 
                 for (Resource resource : selectedHouse.getResourcesFromInventory(type)) {
 
-                    StackPane child=new StackPane();
+                    StackPane child = new StackPane();
                     child.setPrefWidth(200);
+                    child.setMaxWidth(200);
                     child.setPrefHeight(20);
-                    Texture tex=getResourceTexture(type);
+                    Texture tex = getResourceTexture(type);
 //                    tex.setTranslateX(-50);
                     child.getChildren().add(tex);
-                    Text text=new Text( " -> " + ((resource.target == null) ? "" : resource.target.name));
+                    Text text = new Text(" -> " + ((resource.target == null) ? "" : resource.target.name));
                     //text.setTranslateX(-0);
                     child.getChildren().add(text);
                     child.setAlignment(tex, Pos.TOP_LEFT);
@@ -142,16 +194,19 @@ public class UIManager {
             for (ResourceType type : ResourceType.values()) {
 
                 for (Resource resource : selectedHouse.getResourcesFromReserve(type)) {
-                    StackPane child=new StackPane();
+                    StackPane child = new StackPane();
                     child.setPrefWidth(200);
+                    child.setMaxWidth(200);
                     child.setPrefHeight(20);
-                    Texture tex=getResourceTexture(type);
+                    Texture tex = getResourceTexture(type);
                     tex.setTranslateX(-100);
                     child.getChildren().add(tex);
-                    Text text=new Text( " <--- " /*+ ((resource.target == null) ? "" : resource.target.toString())*/);
+                    Text text = new Text(" <--- " /*+ ((resource.target == null) ? "" : resource.target.toString())*/);
                     tex.setTranslateX(-80);
                     child.getChildren().add(text);
                     resourcePane.getChildren().add(child);
+                    resourcePane.autosize();
+
                 }
             }
 
@@ -161,6 +216,8 @@ public class UIManager {
 
     public void initBuildHouses() {
         ObservableList<Node> children = buildHousePane.getChildren();
+        buildHousePane.setMaxWidth(350);
+        buildHousePane.autosize();
         Text small = new Text("Small Buildings");
         small.setFill(Color.TRANSPARENT);//new Background(new BackgroundFill(Color.TRANSPARENT,null,null))
         small.setStroke(Color.WHITE);
@@ -217,6 +274,7 @@ public class UIManager {
                 clickMode = ClickMode.BUILD;
                 houseToBuild = type;
             });
+            button.setMaxWidth(350);
             button.setGraphic(texture);
             button.setText(type.toString());
             button.setId("Button");

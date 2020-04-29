@@ -1,13 +1,12 @@
 package Settlers.Types;
 
-public enum GameSpeed {
-    NORMAL(1),
-    FAST(3),
-    VERY_FAST(5);
-
+public class GameSpeed {
+    static GameSpeed NORMAL=new GameSpeed(1);
+    public static GameSpeed FAST=new GameSpeed(3);
+    static GameSpeed VERYFAST=new GameSpeed(5);
     public final int val;
 
-    GameSpeed(int i) {
+    public GameSpeed(int i) {
         this.val=i;
     }
 }
