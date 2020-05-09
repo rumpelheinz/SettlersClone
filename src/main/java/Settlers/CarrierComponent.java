@@ -21,7 +21,6 @@ public class CarrierComponent extends Component {
     private TileComponent aTile;
     private TileComponent bTile;
     Point2D[] pathPoints2D;
-    TileComponent currentTile;
     int currentIndex;
     private int targetIndex;
     private int timeSinceLastRedraw;
@@ -38,7 +37,7 @@ public class CarrierComponent extends Component {
             Point2D aLoc = pathPoints2D[(currentIndex)];
             Point2D bLoc = currTargetLoc;
             Vec2 dir = new Vec2(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY());
-            dir = dir.mul(speed* BasicGameApp.gameSpeed.val);                        //
+            dir = dir.mul(speed * BasicGameApp.gameSpeed.val);                        //
             if ((dir.length() + 1 >= new Vec2(currentPosition2D.subtract(bLoc)).length())) {   // update next location when the next point is reached
                 currentPosition2D = currTargetLoc;
                 entity.setPosition(currTargetLoc);
@@ -85,7 +84,7 @@ public class CarrierComponent extends Component {
     private Resource checkForResources(TileComponent tileComponent) {
 //        tileComponent.getResourcesWithTargets();
         for (Resource resource : tileComponent.inventoryList) {
-            if (tileComponent.house!=null&&resource.target==tileComponent.house){
+            if (tileComponent.house != null && resource.target == tileComponent.house) {
                 return resource;
             }
             LengthPair sourceLengthPair = tileComponent.getPathsectionTo(resource.target);
@@ -224,105 +223,111 @@ public class CarrierComponent extends Component {
                 case RETURNING: {
 
                     if (targetIndex == currentIndex) {
-                        if (resource.target.flagTile==getTileForIndex(currentIndex)){
-                            targetHouse=resource.target;
-                            currentTaskType=TaskType.GOINGINSIDE;
+                        if (resource.target.flagTile == getTileForIndex(currentIndex)) {
+                            targetHouse = resource.target;
+                            currentTaskType = TaskType.GOINGINSIDE;
+                            curtarget = targetHouse.location;
+                            currentTile = targetHouse.flagTile;
                             return;
                         }
-
+                        dropOff();
                         dropOffTile.addResource(resource);
-                        dropOff();
-
-                        TileComponent currentATile;
-                        TileComponent currentBTile;
-                        if (currentIndex == 0) {
-                            currentATile = aTile;
-                            currentBTile = bTile;
-                        } else {
-                            currentBTile = aTile;
-                            currentATile = bTile;
-                        }
-                        Resource targetResource = checkForResources(currentATile);
-                        if (targetResource != null) {
-                            setTargetResource(targetResource, currentATile);
-                        } else {
-                            targetResource = checkForResources(currentBTile);
-                            if (targetResource != null)
-                                setTargetResource(targetResource, currentBTile);
-                        }
-                        if (resource == null) {
-                            targetIndex = pathPoints2D.length / 2;
-                        }
+                        resource = null;
+                        findTarget();
 
                     }
                     break;
                 }
-                case GOINGINSIDE:{
-                    moveTowardsHouse();
-                    if (currentPosition2D.equals(targetHouse.getEntity().getPosition())){
+                case GOINGINSIDE: {
+                    moveTowardsTarget();
+                    if (currentPosition2D.equals(targetHouse.getEntity().getPosition())) {
+                        dropOff();
                         targetHouse.addResource(resource);
-                        dropOff();
-                        currentTaskType=TaskType.GOINGTOFLAG;
+                        resource = null;
+                        currentTaskType = TaskType.GOINGTOFLAG;
+                        curtarget = targetHouse.flagTile;
+                        currentTile = targetHouse.location;
+
                     }
                     break;
                 }
-                case GOINGTOFLAG:{
-////                    moveTowardsFlag();
-//                    if (currentPosition2D.equals(targetHouse.getEntity().getPosition())){
-//                        targetHouse.addResource(resource);
-//                        dropOff();
-//                        currentTaskType=TaskType.GOINGTOFLAG;
-//                    }
+                case GOINGTOFLAG: {
+                    moveTowardsTarget();
+                    if (currentTile.equals(curtarget)) {
+                        findTarget();
+                    }
                     break;
                 }
             }
         }
 //        super.onUpdate(tpf);
     }
-    TileComponent flagTarget;
-    TileComponent getTileForIndex(int index){
-        if (index==0)
+
+
+    TileComponent getTileForIndex(int index) {
+        if (index == 0)
             return aTile;
-        if (index==pathPoints2D.length-1)
+        if (index == pathPoints2D.length - 1)
             return bTile;
         throw new Error();
     }
-    void moveTowardsHouse(){
-            TileComponent curtarget = targetHouse.location;
-            currentTile=targetHouse.flagTile;
-            if (curtarget == currentTile) return;
-            Point2D a = currentTile.getEntity().getPosition();
-            Point2D b = curtarget.getEntity().getPosition();
-            Vec2 dir = new Vec2(b.getX() - a.getX(), b.getY() - a.getY());
-            // System.out.println(dir.toString());
-            dir = dir.mul(speed * BasicGameApp.gameSpeed.val);                        //
-            if (dir.length()+0.1 >= new Vec2(currentPosition2D.subtract(b)).length()) {
-                currentPosition2D = curtarget.getEntity().getPosition();
-                entity.setPosition(currentPosition2D);
-                currentTile = curtarget;
-            } else {
-                //  System.out.println(dir.toString());
-                currentPosition2D = dir.add(currentPosition2D).toPoint2D();
-                timeSinceLastRedraw++;
-                if (timeSinceLastRedraw > stepsBetweenRedraw) {
-                    timeSinceLastRedraw = 0;
-                    entity.setPosition(currentPosition2D); //Uncommenting this line increases CPUusage significantly
-                }
+
+    TileComponent curtarget;
+    TileComponent currentTile;
+
+    void findTarget() {
+        TileComponent currentATile;
+        TileComponent currentBTile;
+        if (currentIndex == 0) {
+            currentATile = aTile;
+            currentBTile = bTile;
+        } else {
+            currentBTile = aTile;
+            currentATile = bTile;
+        }
+        Resource targetResource = checkForResources(currentATile);
+        if (targetResource != null) {
+            setTargetResource(targetResource, currentATile);
+        } else {
+            targetResource = checkForResources(currentBTile);
+            if (targetResource != null)
+                setTargetResource(targetResource, currentBTile);
+        }
+        if (resource == null) {
+            targetIndex = pathPoints2D.length / 2;
+        }
+    }
+
+    void moveTowardsTarget() {
+        if (curtarget == currentTile) return;
+        Point2D a = currentTile.getEntity().getPosition();
+        Point2D b = curtarget.getEntity().getPosition();
+        Vec2 dir = new Vec2(b.getX() - a.getX(), b.getY() - a.getY());
+        // System.out.println(dir.toString());
+        dir = dir.mul(speed * BasicGameApp.gameSpeed.val);                        //
+        if (dir.length() + 0.1 >= new Vec2(currentPosition2D.subtract(b)).length()) {
+            currentPosition2D = curtarget.getEntity().getPosition();
+            entity.setPosition(currentPosition2D);
+            currentTile = curtarget;
+        } else {
+            //  System.out.println(dir.toString());
+            currentPosition2D = dir.add(currentPosition2D).toPoint2D();
+            timeSinceLastRedraw++;
+            if (timeSinceLastRedraw > stepsBetweenRedraw) {
+                timeSinceLastRedraw = 0;
+                entity.setPosition(currentPosition2D); //Uncommenting this line increases CPUusage significantly
             }
+        }
 
     }
+
     HouseComponent targetHouse;
 
-    void dropOff(){
-        getEntity().getViewComponent().removeChild(log);
-        getEntity().getViewComponent().removeChild(stone);
-        getEntity().getViewComponent().removeChild(plank);
+    void dropOff() {
         setResourceTexture(resource, false);
-//                        getEntity().getViewComponent().removeChild(resourceTexture);
         currentTaskType = TaskType.IDLE;
         hasResource = false;
-        resource = null;
-        dropOffTile = null;
+        resource.reservedByWorker=null;
     }
 
     public void clearTargetResource() {
@@ -386,9 +391,9 @@ public class CarrierComponent extends Component {
     Texture resourceTexture;
 
     private void setResourceTexture(Resource resource, boolean visible) {
-        getEntity().getViewComponent().removeChild(log);
-        getEntity().getViewComponent().removeChild(plank);
-        getEntity().getViewComponent().removeChild(stone);
+//        getEntity().getViewComponent().removeChild(log);
+//        getEntity().getViewComponent().removeChild(plank);
+//        getEntity().getViewComponent().removeChild(stone);
         resourceTexture = null;
         switch (resource.type) {
             case LOG:
@@ -419,4 +424,6 @@ public class CarrierComponent extends Component {
             return oldResource;
         else return null;
     }
+
+
 }
