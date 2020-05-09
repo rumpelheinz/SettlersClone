@@ -2,10 +2,7 @@ package Settlers;
 
 import Settlers.Types.Hextypes;
 import Settlers.Types.TileType;
-import Settlers.Workers.ForresterComponent;
-import Settlers.Workers.HouseBuilderComponent;
-import Settlers.Workers.RockCutter;
-import Settlers.Workers.WoodCutterComponent;
+import Settlers.Workers.*;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
@@ -82,6 +79,15 @@ public class HexFactory implements EntityFactory {
                 .type(Hextypes.WORKER)
                 .from(data)
                 .with(new HouseBuilderComponent())
+                .build();
+    }
+
+    @Spawns("SawmillWorker")
+    public Entity newSawmillWorker(SpawnData data) {
+        return entityBuilder()
+                .type(Hextypes.WORKER)
+                .from(data)
+                .with(new SawmillWorker())
                 .build();
     }
 

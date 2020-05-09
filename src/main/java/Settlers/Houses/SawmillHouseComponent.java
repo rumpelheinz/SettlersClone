@@ -4,6 +4,8 @@ import Settlers.*;
 import Settlers.Types.HouseSize;
 import Settlers.Types.ResourceType;
 import Settlers.Types.TileType;
+import Settlers.Workers.RockCutter;
+import Settlers.Workers.SawmillWorker;
 import Settlers.Workers.WorkerComponent;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
@@ -155,12 +157,13 @@ public class SawmillHouseComponent extends HouseComponent {
 
     @Override
     public WorkerComponent spawnWorker() {
-        return null;
+        SawmillWorker worker2 = spawn("SawmillWorker", location.getEntity().getX(), location.getEntity().getY()).getComponent(SawmillWorker.class);
+        return worker2;
     }
 
     @Override
     boolean usesWorker() {
-        return false;
+        return true;
     }
 
     @Override

@@ -12,7 +12,6 @@ public class Map {
     int width;
     int height;
     Random random = new Random();
-    static TileContainerComponent tileContainer;
 
     HashMap<Vec2, TileComponent> tiles;
 

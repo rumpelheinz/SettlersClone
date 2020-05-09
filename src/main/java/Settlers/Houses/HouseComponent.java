@@ -31,7 +31,7 @@ public abstract class HouseComponent extends InventoryComponent {
 
     public boolean destroyed = false;
     public TileComponent flagTile;
-    TileComponent location;
+    public TileComponent location;
     Texture texture;
     WorkerComponent worker;
     HouseBuilderComponent builder;

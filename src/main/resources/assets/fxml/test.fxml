@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="104.0" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="104.0" prefWidth="305.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+   <effect>
+      <Glow />
+   </effect>
+   <children>
+      <HBox layoutX="-86.0" layoutY="2.0" prefHeight="100.0" prefWidth="200.0" />
+      <ToolBar layoutX="43.0" layoutY="2.0" prefHeight="40.0" prefWidth="200.0" />
+      <ButtonBar prefHeight="40.0" prefWidth="200.0">
+        <buttons>
+            <Button mnemonicParsing="false" text="Button" />
+          <Button mnemonicParsing="false" text="Button" />
+            <Button mnemonicParsing="false" text="Button" />
+            <Button mnemonicParsing="false" text="Button" />
+            <Button mnemonicParsing="false" text="Button" />
+        </buttons>
+      </ButtonBar>
+    <Button layoutX="119.0" layoutY="52.0" mnemonicParsing="false" text="Button" />
+   </children>
+</AnchorPane>

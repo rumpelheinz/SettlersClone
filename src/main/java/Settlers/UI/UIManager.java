@@ -201,7 +201,7 @@ public class UIManager {
                     Texture tex = getResourceTexture(type);
                     tex.setTranslateX(-100);
                     child.getChildren().add(tex);
-                    Text text = new Text(" <--- " /*+ ((resource.target == null) ? "" : resource.target.toString())*/);
+                    Text text = new Text("<---" /*+ ((resource.target == null) ? "" : resource.target.toString())*/);
                     tex.setTranslateX(-80);
                     child.getChildren().add(text);
                     resourcePane.getChildren().add(child);
