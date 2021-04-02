@@ -2,7 +2,7 @@
 
 A fun side project to create a Settlers II clone in Java. Written by myself for myself.
 
-![Screenshot](Screenshot.png)
+![Demo](gameplay.gif)
 
 
 ## Gameplay

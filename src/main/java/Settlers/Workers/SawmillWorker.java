@@ -1,6 +1,5 @@
 package Settlers.Workers;
 
-import Settlers.RockComponent;
 import Settlers.TileComponent;
 import Settlers.Types.ResourceType;
 import Settlers.Types.WorkerType;

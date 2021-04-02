@@ -1,21 +1,14 @@
 package Settlers.Workers;
 
 import Settlers.*;
-import Settlers.Houses.ForresterHouseComponent;
 
+import Settlers.TileResources.TreeComponent;
 import Settlers.Types.ResourceType;
-import Settlers.Types.TaskType;
 import Settlers.Types.TileType;
 import Settlers.Types.WorkerType;
-import com.almasb.fxgl.core.math.Vec2;
-import com.almasb.fxgl.entity.component.Component;
-import com.almasb.fxgl.texture.Texture;
-import javafx.geometry.Point2D;
 
-import java.util.LinkedList;
 import java.util.Optional;
 
-import static Settlers.BasicGameApp.stepsBetweenRedraw;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
 public class ForresterComponent extends WorkerComponent {

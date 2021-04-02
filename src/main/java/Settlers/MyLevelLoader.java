@@ -2,11 +2,10 @@ package Settlers;
 
 import java.io.*;
 
-import Settlers.Houses.SawmillHouseComponent;
 import Settlers.Houses.StoreHouseComponent;
-import Settlers.Houses.WoodcutterHouseComponent;
+import Settlers.TileResources.RockComponent;
+import Settlers.TileResources.TreeComponent;
 import Settlers.Types.TileType;
-import com.almasb.fxgl.entity.SpawnData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

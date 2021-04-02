@@ -1,6 +1,8 @@
 package Settlers;
 
 import Settlers.Houses.*;
+import Settlers.TileResources.RockComponent;
+import Settlers.TileResources.TreeComponent;
 import Settlers.Types.*;
 import Settlers.UI.UIManager;
 import Settlers.Workers.WorkerComponent;

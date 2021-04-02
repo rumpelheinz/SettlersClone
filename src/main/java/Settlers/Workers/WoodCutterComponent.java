@@ -1,11 +1,9 @@
 package Settlers.Workers;
 
 import Settlers.*;
+import Settlers.TileResources.TreeComponent;
 import Settlers.Types.ResourceType;
-import Settlers.Types.TaskType;
-import Settlers.Types.TileType;
 import Settlers.Types.WorkerType;
-import com.almasb.fxgl.texture.Texture;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
